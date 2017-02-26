@@ -1,0 +1,13 @@
+moshe;0;1;2;3;4;5;6
+dudu;;  
+moshe;1;1;1;1;1;1;1
+dudu;;  
+moshe;0;10;2;3;4;5;6
+dudu;;  
+moshe;1;1;1;1;1;1;1
+dudu;;  
+dudu;;  
+dudu;;  
+moshe;0;1;2;3;4;5;6
+dudu;;  
+moshe;1;1;1;1;1;1;1

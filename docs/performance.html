@@ -1,0 +1,377 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Performance &mdash; DAGPype 0.1.5.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.5.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="DAGPype 0.1.5.0 documentation" href="index.html" />
+    <link rel="next" title="Reference" href="reference.html" />
+    <link rel="prev" title="Awk-Like Examples" href="awk.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="reference.html" title="Reference"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="awk.html" title="Awk-Like Examples"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">DAGPype 0.1.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="performance">
+<h1>Performance<a class="headerlink" href="#performance" title="Permalink to this headline">¶</a></h1>
+<p>This page shows performance tests for various tasks comparing DAGPpype pipelines to standard Python, standard Python + NumPy, Perl, Awk, Sed, and C.</p>
+<p>Overall, even though the ability to write reusable stages tends to produce shorter and clearer pipeline code, DAGPype&#8217;s performance using regular pipelines is as good as any of the other implementations. Moreover, when chunking is used (see <a class="reference internal" href="numpy_chunks.html"><em>NumPy And High-Performance Chunking</em></a>) performance increases greatly. Standard Python (or Perl) code using chunking, conversely, would be far less readable and much less reusable.</p>
+<div class="section" id="csv-minimum-field">
+<span id="performance-min"></span><h2>CSV Minimum Field<a class="headerlink" href="#csv-minimum-field" title="Permalink to this headline">¶</a></h2>
+<p>In this test, each implementation found the minimum value of all the fields of a CSV file (see <a class="reference download internal" href="_downloads/_min.py"><tt class="xref download docutils literal"><span class="pre">_min.py</span></tt></a> for the source).</p>
+<div class="figure">
+<img alt="min performance" src="_images/Min.png" />
+</div>
+<p>To clarify the results, here are further tests with Per omitted:</p>
+<div class="figure">
+<img alt="min performance, no Perl" src="_images/MinNoPerl.png" />
+</div>
+<p>The <tt class="docutils literal"><span class="pre">dagpype</span></tt> pipeline is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">m</span> <span class="o">=</span> <span class="n">stream_vals</span><span class="p">(</span><span class="n">_f_name</span><span class="p">,</span> <span class="n">delimit</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">tup</span><span class="p">))</span> <span class="o">|</span> <span class="n">min_</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>and the <tt class="docutils literal"><span class="pre">chunking</span> <span class="pre">dagpype</span></tt> pipeline is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">chunk_stream_vals</span><span class="p">(</span><span class="n">_f_name</span><span class="p">,</span> <span class="n">delimit</span> <span class="o">=</span> <span class="n">b</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_cols</span><span class="p">))</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="o">|</span> <span class="n">min_</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>which uses chunking and NumPy internally.</p>
+<p>The <tt class="docutils literal"><span class="pre">numpy</span></tt> code is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">_f_name</span><span class="p">,</span> <span class="n">delimiter</span> <span class="o">=</span> <span class="n">b</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>So it is possible to see that chunking improves performance over going over the fields line by line, but using a single chunk for the entire file (which is what the <tt class="docutils literal"><span class="pre">numpy</span></tt> implementation does) is not necessarily a good idea.</p>
+</div>
+<div class="section" id="csv-columns-correlation">
+<span id="performance-csv-corr"></span><h2>CSV Columns Correlation<a class="headerlink" href="#csv-columns-correlation" title="Permalink to this headline">¶</a></h2>
+<p>In this test, each implementation found the correlation between two CSV columns, pruning outlier values (see <a class="reference download internal" href="_downloads/_csv_corr_prune.py"><tt class="xref download docutils literal"><span class="pre">_csv_corr_prune.py</span></tt></a> for the source).</p>
+<div class="figure">
+<img alt="csv-corr performance" src="_images/CSVCorrPrune.png" />
+</div>
+<p>The <tt class="docutils literal"><span class="pre">dagpype</span></tt> pipeline is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">c</span> <span class="o">=</span> <span class="n">stream_vals</span><span class="p">(</span><span class="n">_f_name</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;0&#39;</span><span class="p">,</span> <span class="s">&#39;1&#39;</span><span class="p">))</span> <span class="o">|</span> \
+    <span class="n">filt</span><span class="p">(</span><span class="n">pre</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x_y</span> <span class="p">:</span> <span class="n">x_y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.5</span> <span class="ow">and</span> <span class="n">x_y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">|</span> \
+    <span class="n">corr</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>and the <tt class="docutils literal"><span class="pre">chunking</span> <span class="pre">dagpype</span></tt> pipeline is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">chunk_stream_vals</span><span class="p">(</span><span class="n">_f_name</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;0&#39;</span><span class="p">,</span> <span class="s">&#39;1&#39;</span><span class="p">))</span> <span class="o">|</span> \
+    <span class="n">filt</span><span class="p">(</span><span class="n">pre</span> <span class="o">=</span> <span class="k">lambda</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">)],</span> <span class="n">y</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">)]))</span> <span class="o">|</span> \
+    <span class="n">np</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>which uses chunking and NumPy internally.</p>
+<p>The <tt class="docutils literal"><span class="pre">numpy</span></tt> code is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">xy</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="n">_f_name</span><span class="p">,</span> <span class="n">usecols</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">delimiter</span> <span class="o">=</span> <span class="s">&#39;,&#39;</span><span class="p">)</span>
+<span class="n">xy</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">xy</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">xy</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">)]</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">((</span><span class="n">xy</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">xy</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">csv.reader</span></tt> code is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">r</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">_f_name</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">))</span>
+
+<span class="n">fields</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+<span class="n">ind0</span><span class="p">,</span> <span class="n">ind1</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&#39;0&#39;</span><span class="p">),</span> <span class="n">fields</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s">&#39;1&#39;</span><span class="p">)</span>
+
+<span class="n">sx</span><span class="p">,</span> <span class="n">sxx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">syy</span><span class="p">,</span> <span class="n">sxy</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">ind0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">ind1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mf">0.5</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+            <span class="n">sx</span> <span class="o">+=</span> <span class="n">x</span>
+            <span class="n">sxx</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span>
+            <span class="n">sy</span> <span class="o">+=</span> <span class="n">y</span>
+            <span class="n">sxy</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
+            <span class="n">syy</span> <span class="o">+=</span> <span class="n">y</span> <span class="o">*</span> <span class="n">y</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">sxy</span> <span class="o">-</span> <span class="n">sx</span> <span class="o">*</span> <span class="n">sy</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">sxx</span> <span class="o">-</span> <span class="n">sx</span> <span class="o">*</span> <span class="n">sx</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">syy</span> <span class="o">-</span> <span class="n">sy</span> <span class="o">*</span> <span class="n">sy</span><span class="p">)</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">_f_name</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;0&#39;</span><span class="p">,</span> <span class="s">&#39;1&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>and the <tt class="docutils literal"><span class="pre">csv.DictReader</span></tt> code is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sx</span><span class="p">,</span> <span class="n">sxx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">syy</span><span class="p">,</span> <span class="n">sxy</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">r</span><span class="p">:</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s">&#39;0&#39;</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mf">0.5</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+        <span class="n">sx</span> <span class="o">+=</span> <span class="n">x</span>
+        <span class="n">sxx</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span>
+        <span class="n">sy</span> <span class="o">+=</span> <span class="n">y</span>
+        <span class="n">sxy</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
+        <span class="n">syy</span> <span class="o">+=</span> <span class="n">y</span> <span class="o">*</span> <span class="n">y</span>
+        <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">sxy</span> <span class="o">-</span> <span class="n">sx</span> <span class="o">*</span> <span class="n">sy</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">sxx</span> <span class="o">-</span> <span class="n">sx</span> <span class="o">*</span> <span class="n">sx</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">syy</span> <span class="o">-</span> <span class="n">sy</span> <span class="o">*</span> <span class="n">sy</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>somewhat surprisingly, <tt class="docutils literal"><span class="pre">csv.DictReader</span></tt> is less efficient than <tt class="docutils literal"><span class="pre">csv.reader</span></tt>, even though it was informed it needed to parse only two columns. The pipe observations are similar to those in <a class="reference internal" href="#performance-min">performance_min</a>.</p>
+</div>
+<div class="section" id="binary-file-correlation">
+<span id="performance-binary-corr"></span><h2>Binary File Correlation<a class="headerlink" href="#binary-file-correlation" title="Permalink to this headline">¶</a></h2>
+<p>In this test, each implementation found the correlation between two values of a binary file (see <a class="reference download internal" href="_downloads/_binary_corr.py"><tt class="xref download docutils literal"><span class="pre">_binary_corr.py</span></tt></a> for the source).</p>
+<div class="figure">
+<img alt="binary-corr performance" src="_images/BinaryCorr.png" />
+</div>
+<p>If we add pruning, we get the following (see <a class="reference download internal" href="_downloads/_binary_corr_prune.py"><tt class="xref download docutils literal"><span class="pre">_binary_corr_prune.py</span></tt></a> for the source):</p>
+<div class="figure">
+<img alt="binary-corr prune performance" src="_images/BinaryCorrPrune.png" />
+</div>
+<p>alternatively, if we add truncation, whereby outlier elements are truncated to some value, we get the following (see <a class="reference download internal" href="_downloads/_binary_corr_trunc.py"><tt class="xref download docutils literal"><span class="pre">_binary_corr_trunc.py</span></tt></a> for the source):</p>
+<div class="figure">
+<img alt="binary-corr trunc performance" src="_images/BinaryCorrTrunc.png" />
+</div>
+<p>For the first of the three, the The <tt class="docutils literal"><span class="pre">C</span></tt> implementation is:</p>
+<div class="highlight-python"><pre>double c_corr_prune(const char f_name[])
+{
+    FILE *const pf = fopen(f_name, "rb");
+    assert(pf != NULL);
+    double sx = 0, sxx = 0, sy = 0, syy = 0, sxy = 0;
+    size_t n = 0;
+    while(1)
+    {
+        double x, y;
+        if(fread(&amp;x, sizeof(double), 1, pf) != 1 || fread(&amp;y, sizeof(double), 1, pf) != 1 || feof(pf))
+        {
+            fclose(pf);
+            break;
+        }
+        if(x &gt;= 0.25 || y &gt;= 0.25)
+            continue;
+        sx += x;
+        sxx += x * x;
+        sy += y;
+        sxy += x * y;
+        syy += y * y;
+        ++n;
+    }
+
+    // printf("C %ld values\n", n);
+
+    return (n * sxy - sx * sy) / sqrt(n * sxx - sx * sx) / sqrt(n * syy - sy * sy);
+}</pre>
+</div>
+<p>The NumPy implementation, processing all data in a single chunk, is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">s</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">_f_name</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="n">xy</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="n">s</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">sx</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">sy</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="n">c</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">xy</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">xy</span><span class="p">)</span>
+
+<span class="n">sxx</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">sxy</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">syy</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+<span class="n">n</span> <span class="o">=</span> <span class="n">xy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">res</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">sxy</span> <span class="o">-</span> <span class="n">sx</span> <span class="o">*</span> <span class="n">sy</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">sxx</span> <span class="o">-</span> <span class="n">sx</span> <span class="o">*</span> <span class="n">sx</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">syy</span> <span class="o">-</span> <span class="n">sy</span> <span class="o">*</span> <span class="n">sy</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">chunking</span> <span class="pre">dagpype</span></tt> implementation is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">chunk_stream_bytes</span><span class="p">(</span><span class="n">_f_name</span><span class="p">,</span> <span class="n">num_cols</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The pipe observations are similar to those in <a class="reference internal" href="#performance-min">performance_min</a>.</p>
+</div>
+<div class="section" id="csv-column-mean">
+<span id="performance-csv-mean"></span><h2>CSV Column Mean<a class="headerlink" href="#csv-column-mean" title="Permalink to this headline">¶</a></h2>
+<p>In this test, each implementation found the mean of the fields in a CSV column (see <a class="reference download internal" href="_downloads/_csv_mean.py"><tt class="xref download docutils literal"><span class="pre">_csv_mean.py</span></tt></a> for the source).</p>
+<div class="figure">
+<img alt="csv-mean performance" src="_images/CSVMean.png" />
+</div>
+</div>
+<div class="section" id="text-conditional-replacement">
+<span id="performance-line-numbering"></span><h2>Text Conditional Replacement<a class="headerlink" href="#text-conditional-replacement" title="Permalink to this headline">¶</a></h2>
+<p>In this test, each implementation changed &#8216;foo&#8217; to &#8216;bar&#8217; on each line of text containing &#8216;baz&#8217;(see <a class="reference download internal" href="_downloads/_foo_bar_baz.py"><tt class="xref download docutils literal"><span class="pre">_foo_bar_baz.py</span></tt></a> for the source).</p>
+<div class="figure">
+<img alt="conditional-replacement performance" src="_images/FooBarBaz.png" />
+</div>
+<p>The <tt class="docutils literal"><span class="pre">dagpype</span></tt> pipeline is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">stream_lines</span><span class="p">(</span><span class="n">_f_name</span><span class="p">,</span> <span class="n">rstrip</span> <span class="o">=</span> <span class="bp">False</span><span class="p">)</span> <span class="o">|</span> \
+    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="s">&#39;baz&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="k">else</span> <span class="n">l</span><span class="p">)</span> <span class="o">|</span> \
+    <span class="n">to_stream</span><span class="p">(</span><span class="s">&#39;pipe_bar.txt&#39;</span><span class="p">,</span> <span class="n">line_terminator</span> <span class="o">=</span> <span class="n">b</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and the <tt class="docutils literal"><span class="pre">chunking</span> <span class="pre">dagpype</span></tt> pipeline is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">np</span><span class="o">.</span><span class="n">chunk_source</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">_f_name</span><span class="p">))</span> <span class="o">|</span> \
+    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">ls</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="s">&#39;baz&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="k">else</span> <span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">ls</span><span class="p">))</span> <span class="o">|</span> \
+    <span class="n">to_stream</span><span class="p">(</span><span class="s">&#39;chunking_pipe_bar.txt&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">standard</span> <span class="pre">python</span></tt> code is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">i</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">_f_name</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">o</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;std_bar.txt&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">i</span><span class="p">:</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="n">l</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="s">&#39;baz&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="k">else</span> <span class="n">l</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">sed</span></tt> code is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s">&quot;sed &#39;/baz/s/foo/bar/g&#39; </span><span class="si">%s</span><span class="s"> &gt; sed_bar.txt&quot;</span> <span class="o">%</span> <span class="n">_f_name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">awk</span></tt> code is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s">&quot;awk &#39;/baz/ { gsub(/foo/, </span><span class="se">\&quot;</span><span class="s">bar</span><span class="se">\&quot;</span><span class="s">) }; { print }&#39; </span><span class="si">%s</span><span class="s"> &gt; awk_bar.txt&quot;</span> <span class="o">%</span> <span class="n">_f_name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">perl</span></tt> code is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s">&quot;perl -pe &#39;/baz/ &amp;&amp; s/foo/bar/&#39; </span><span class="si">%s</span><span class="s"> &gt; perl_bar.txt&quot;</span> <span class="o">%</span> <span class="n">_f_name</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="text-line-numbering">
+<h2>Text Line Numbering<a class="headerlink" href="#text-line-numbering" title="Permalink to this headline">¶</a></h2>
+<p>In this test, each implementation numbered the lines of a text file (see <a class="reference download internal" href="_downloads/_line_numbering.py"><tt class="xref download docutils literal"><span class="pre">_line_numbering.py</span></tt></a> for the source).</p>
+<div class="figure">
+<img alt="line-numbering performance" src="_images/LineNumbering.png" />
+</div>
+<p>The <tt class="docutils literal"><span class="pre">dagpype</span></tt> pipeline is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">source</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">_f_name</span><span class="p">)))</span> <span class="o">|</span> \
+    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span> <span class="s">&#39;</span><span class="si">%d</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">))</span> <span class="o">|</span> \
+    <span class="n">to_stream</span><span class="p">(</span><span class="s">&#39;pipe_bar.txt&#39;</span><span class="p">,</span> <span class="n">line_terminator</span> <span class="o">=</span> <span class="n">b</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and the <tt class="docutils literal"><span class="pre">chunking</span> <span class="pre">dagpype</span></tt> pipeline is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">np</span><span class="o">.</span><span class="n">chunk_source</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">_f_name</span><span class="p">)))</span> <span class="o">|</span> \
+    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">ps</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%d</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">ps</span><span class="p">))</span> <span class="o">|</span> \
+    <span class="n">to_stream</span><span class="p">(</span><span class="s">&#39;chunking_pipe_bar.txt&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">standard</span> <span class="pre">python</span></tt> code is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">i</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">_f_name</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+<span class="n">o</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;std_bar.txt&#39;</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;{:&lt;5} {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">l</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">sed</span></tt> code is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s">&quot;sed &#39;N;s/</span><span class="se">\\</span><span class="s">n/</span><span class="se">\\</span><span class="s">t/&#39; </span><span class="si">%s</span><span class="s"> &gt; sed_bar.txt&quot;</span> <span class="o">%</span> <span class="n">_f_name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">awk</span></tt> code is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s">&quot;awk &#39;{ print NR </span><span class="se">\&quot;\\</span><span class="s">t</span><span class="se">\&quot;</span><span class="s"> $0 }&#39; </span><span class="si">%s</span><span class="s"> &gt; awk_bar.txt&quot;</span> <span class="o">%</span> <span class="n">_f_name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">perl</span></tt> code is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s">&quot;perl -pe &#39;$_ = </span><span class="se">\&quot;</span><span class="s">$. $_</span><span class="se">\&quot;</span><span class="s">&#39; </span><span class="si">%s</span><span class="s"> &gt; perl_bar.txt&quot;</span> <span class="o">%</span> <span class="n">_f_name</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Performance</a><ul>
+<li><a class="reference internal" href="#csv-minimum-field">CSV Minimum Field</a></li>
+<li><a class="reference internal" href="#csv-columns-correlation">CSV Columns Correlation</a></li>
+<li><a class="reference internal" href="#binary-file-correlation">Binary File Correlation</a></li>
+<li><a class="reference internal" href="#csv-column-mean">CSV Column Mean</a></li>
+<li><a class="reference internal" href="#text-conditional-replacement">Text Conditional Replacement</a></li>
+<li><a class="reference internal" href="#text-line-numbering">Text Line Numbering</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="awk.html"
+                        title="previous chapter">Awk-Like Examples</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference.html"
+                        title="next chapter">Reference</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/performance.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="reference.html" title="Reference"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="awk.html" title="Awk-Like Examples"
+             >previous</a> |</li>
+        <li><a href="index.html">DAGPype 0.1.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ami Tavory.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

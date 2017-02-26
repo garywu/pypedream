@@ -1,0 +1,313 @@
+===========
+Performance
+===========
+
+This page shows performance tests for various tasks comparing DAGPpype pipelines to standard Python, standard Python + NumPy, Perl, Awk, Sed, and C.
+
+Overall, even though the ability to write reusable stages tends to produce shorter and clearer pipeline code, DAGPype's performance using regular pipelines is as good as any of the other implementations. Moreover, when chunking is used (see :doc:`numpy_chunks`) performance increases greatly. Standard Python (or Perl) code using chunking, conversely, would be far less readable and much less reusable.
+
+
+.. _performance_min:
+
+-----------------
+CSV Minimum Field
+-----------------
+
+In this test, each implementation found the minimum value of all the fields of a CSV file (see :download:`_min.py` for the source).
+
+.. figure:: Min.png
+  :alt: min performance
+  
+To clarify the results, here are further tests with Per omitted:  
+
+.. figure:: MinNoPerl.png
+  :alt: min performance, no Perl
+  
+  
+The ``dagpype`` pipeline is:
+::
+
+    m = stream_vals(_f_name, delimit = '\t') | filt(lambda tup: min(tup)) | min_()
+    
+and the ``chunking dagpype`` pipeline is:
+::
+
+    m = np.chunk_stream_vals(_f_name, delimit = b'\t', cols = range(num_cols)) | filt(lambda a: numpy.min(a)) | min_()
+    
+which uses chunking and NumPy internally.      
+
+The ``numpy`` code is:
+::
+ 
+    x = numpy.genfromtxt(_f_name, delimiter = b'\t')
+    print numpy.min(x)
+
+So it is possible to see that chunking improves performance over going over the fields line by line, but using a single chunk for the entire file (which is what the ``numpy`` implementation does) is not necessarily a good idea.
+
+
+.. _performance_csv_corr:
+
+--------------------------
+CSV Columns Correlation
+--------------------------
+
+In this test, each implementation found the correlation between two CSV columns, pruning outlier values (see :download:`_csv_corr_prune.py` for the source).
+
+.. figure:: CSVCorrPrune.png
+  :alt: csv-corr performance  
+  
+The ``dagpype`` pipeline is:
+::
+
+    c = stream_vals(_f_name, ('0', '1')) | \
+        filt(pre = lambda x_y : x_y[0] < 0.5 and x_y[1] < 0.5) | \
+        corr()
+    
+and the ``chunking dagpype`` pipeline is:
+::
+
+    c = np.chunk_stream_vals(_f_name, cols = ('0', '1')) | \
+        filt(pre = lambda (x, y): 
+            (x[numpy.logical_and(x[0] < 0.5, y[1] < 0.5)], y[numpy.logical_and(x < 0.5, y < 0.5)])) | \
+        np.corr()
+    
+which uses chunking and NumPy internally.      
+
+The ``numpy`` code is:
+::
+ 
+    xy = numpy.genfromtxt(_f_name, usecols = (0, 1), delimiter = ',')    
+    xy = xy[numpy.logical_and(xy[:, 0] < 0.5, xy[:, 1] < 0.5)]
+    c = numpy.corrcoef((xy[:, 0], xy[:, 1]))
+    
+The ``csv.reader`` code is:
+::
+
+    r = csv.reader(open(_f_name, 'rb'))
+
+    fields = next(r)
+    ind0, ind1 = fields.index('0'), fields.index('1')
+
+    sx, sxx, sy, syy, sxy, n = 0, 0, 0, 0, 0, 0
+    try:        
+        while True:
+            row = next(r)
+            x, y = float(row[ind0]), float(row[ind1])
+            if x < 0.5 and y < 0.5:
+                sx += x
+                sxx += x * x
+                sy += y
+                sxy += x * y
+                syy += y * y
+                n += 1
+    except StopIteration:
+        c = (n * sxy - sx * sy) / math.sqrt(n * sxx - sx * sx) / math.sqrt(n * syy - sy * sy)
+    r = csv.DictReader(open(_f_name, 'rb'), ('0', '1'))
+
+and the ``csv.DictReader`` code is:
+::
+
+    sx, sxx, sy, syy, sxy, n = 0, 0, 0, 0, 0, 0
+    for row in r:
+        x, y = float(row['0']), float(row['1'])
+        if x < 0.5 and y < 0.5:
+            sx += x
+            sxx += x * x
+            sy += y
+            sxy += x * y
+            syy += y * y
+            n += 1
+    c = (n * sxy - sx * sy) / math.sqrt(n * sxx - sx * sx) / math.sqrt(n * syy - sy * sy)
+
+somewhat surprisingly, ``csv.DictReader`` is less efficient than ``csv.reader``, even though it was informed it needed to parse only two columns. The pipe observations are similar to those in performance_min_.
+
+
+.. _performance_binary_corr:
+
+--------------------------
+Binary File Correlation
+--------------------------
+
+In this test, each implementation found the correlation between two values of a binary file (see :download:`_binary_corr.py` for the source).
+
+.. figure:: BinaryCorr.png
+  :alt: binary-corr performance  
+
+If we add pruning, we get the following (see :download:`_binary_corr_prune.py` for the source):    
+
+.. figure:: BinaryCorrPrune.png
+  :alt: binary-corr prune performance  
+  
+alternatively, if we add truncation, whereby outlier elements are truncated to some value, we get the following (see :download:`_binary_corr_trunc.py` for the source):  
+
+.. figure:: BinaryCorrTrunc.png
+  :alt: binary-corr trunc performance  
+
+For the first of the three, the The ``C`` implementation is:
+::
+
+    double c_corr_prune(const char f_name[])
+    {
+        FILE *const pf = fopen(f_name, "rb");
+        assert(pf != NULL);
+        double sx = 0, sxx = 0, sy = 0, syy = 0, sxy = 0;
+        size_t n = 0;
+        while(1)
+        {
+            double x, y;
+            if(fread(&x, sizeof(double), 1, pf) != 1 || fread(&y, sizeof(double), 1, pf) != 1 || feof(pf))
+            {
+                fclose(pf);
+                break;
+            }
+            if(x >= 0.25 || y >= 0.25)
+                continue;
+            sx += x;
+            sxx += x * x;
+            sy += y;
+            sxy += x * y;
+            syy += y * y;
+            ++n;
+        }
+    
+        // printf("C %ld values\n", n);
+    
+        return (n * sxy - sx * sy) / sqrt(n * sxx - sx * sx) / sqrt(n * syy - sy * sy);
+    }
+    
+The NumPy implementation, processing all data in a single chunk, is:
+
+::
+
+    s = open(_f_name, 'rb').read()
+    a = numpy.fromstring(s)
+    xy = a.reshape(a.shape[0] / 2, 2)    
+    
+    s = numpy.sum(xy, axis = 0)
+    sx = s[0]
+    sy = s[1]
+    
+    c = numpy.dot(xy.T, xy)
+    
+    sxx = c[0, 0]
+    sxy = c[0, 1]
+    syy = c[1, 1]
+    
+    n = xy.shape[0]
+    res = (n * sxy - sx * sy) / math.sqrt(n * sxx - sx * sx) / math.sqrt(n * syy - sy * sy)
+
+The ``chunking dagpype`` implementation is:
+::
+
+    c = np.chunk_stream_bytes(_f_name, num_cols = 2) | np.corr()
+
+The pipe observations are similar to those in performance_min_.
+
+
+.. _performance_csv_mean:
+
+--------------------------
+CSV Column Mean
+--------------------------
+
+In this test, each implementation found the mean of the fields in a CSV column (see :download:`_csv_mean.py` for the source).
+
+.. figure:: CSVMean.png
+  :alt: csv-mean performance  
+
+
+.. _performance_line_numbering:
+
+----------------------------
+Text Conditional Replacement
+----------------------------
+
+In this test, each implementation changed 'foo' to 'bar' on each line of text containing 'baz'(see :download:`_foo_bar_baz.py` for the source).
+
+.. figure:: FooBarBaz.png
+  :alt: conditional-replacement performance
+  
+The ``dagpype`` pipeline is:
+::
+
+    stream_lines(_f_name, rstrip = False) | \
+        filt(lambda l: l.replace('foo', 'bar') if 'baz' in l else l) | \
+        to_stream('pipe_bar.txt', line_terminator = b'')
+    
+and the ``chunking dagpype`` pipeline is:
+::
+
+    np.chunk_source(open(_f_name)) | \
+        filt(lambda ls: ''.join(l.replace('foo', 'bar') if 'baz' in l else l for l in ls)) | \
+        to_stream('chunking_pipe_bar.txt')
+
+The ``standard python`` code is:    
+::
+
+    i = open(_f_name, 'r')
+    o = open('std_bar.txt', 'w')
+    for l in i:
+        o.write((l.replace('foo', 'bar') if 'baz' in l else l))    
+
+The ``sed`` code is:
+::
+ 
+    os.system("sed '/baz/s/foo/bar/g' %s > sed_bar.txt" % _f_name)
+    
+The ``awk`` code is:
+::
+
+    os.system("awk '/baz/ { gsub(/foo/, \"bar\") }; { print }' %s > awk_bar.txt" % _f_name)
+
+The ``perl`` code is:
+::
+
+    os.system("perl -pe '/baz/ && s/foo/bar/' %s > perl_bar.txt" % _f_name)
+
+
+----------------------------
+Text Line Numbering
+----------------------------
+
+In this test, each implementation numbered the lines of a text file (see :download:`_line_numbering.py` for the source).
+
+.. figure:: LineNumbering.png
+  :alt: line-numbering performance
+  
+The ``dagpype`` pipeline is:
+::
+
+    source(enumerate(open(_f_name))) | \
+        filt(lambda (n, l): '%d %s' % (n, l)) | \
+        to_stream('pipe_bar.txt', line_terminator = b'')
+    
+and the ``chunking dagpype`` pipeline is:
+::
+
+    np.chunk_source(enumerate(open(_f_name))) | \
+        filt(lambda ps: ''.join('%d %s' % (n, l) for n, l in ps)) | \
+        to_stream('chunking_pipe_bar.txt')
+
+The ``standard python`` code is:    
+::
+
+    i = open(_f_name, 'r')
+    o = open('std_bar.txt', 'w')
+    for c, l in enumerate(i):
+        o.write('{:<5} {}'.format(c, l))    
+
+The ``sed`` code is:
+::
+ 
+    os.system("sed 'N;s/\\n/\\t/' %s > sed_bar.txt" % _f_name)
+    
+The ``awk`` code is:
+::
+
+    os.system("awk '{ print NR \"\\t\" $0 }' %s > awk_bar.txt" % _f_name)
+
+The ``perl`` code is:
+::
+
+    os.system("perl -pe '$_ = \"$. $_\"' %s > perl_bar.txt" % _f_name)
+

@@ -1,0 +1,285 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Stages &mdash; DAGPype 0.1.5.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.5.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="DAGPype 0.1.5.0 documentation" href="index.html" />
+    <link rel="next" title="Connecting Stages To DAGs" href="connecting_stages.html" />
+    <link rel="prev" title="DAGPype" href="README.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="connecting_stages.html" title="Connecting Stages To DAGs"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="README.html" title="DAGPype"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">DAGPype 0.1.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="stages">
+<h1>Stages<a class="headerlink" href="#stages" title="Permalink to this headline">¶</a></h1>
+<p>A <em>stage</em> is a pipeline element that creates data for the pipeline (e.g., by reading it from a file), manipulates it (e.g., by calculating its absolute value), or consumes it (e.g., by writing it to a file, or by calculating its average). The first type is a <a class="reference internal" href="#source">source</a>, the second is a <a class="reference internal" href="#filter">filter</a>, and the third is a <a class="reference internal" href="#sink">sink</a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ul class="last simple">
+<li>This page describes the different types of stages, and how to create new ones.</li>
+<li><a class="reference internal" href="connecting_stages.html"><em>Connecting Stages To DAGs</em></a> describes how to connect stages to form DAGs.</li>
+<li><a class="reference internal" href="reference.html"><em>Reference</em></a> describes the available stages.</li>
+</ul>
+</div>
+<div class="section" id="sources">
+<span id="source"></span><h2>Sources<a class="headerlink" href="#sources" title="Permalink to this headline">¶</a></h2>
+<p>A <em>source</em> is a pipeline stage to which elements are not sent - it only sends on. A typical source is something that reads text files, CSV files, a numpy.Array, and so forth.</p>
+<p>A source is formed either using the <a class="reference internal" href="reference.html#dagpype.source" title="dagpype.source"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.source()</span></tt></a> function, or using the <a class="reference internal" href="reference.html#dagpype.sources" title="dagpype.sources"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.sources()</span></tt></a> decorator.</p>
+<div class="section" id="creating-a-source-via-the-dagpype-source-function">
+<h3>Creating A Source Via The <a class="reference internal" href="reference.html#dagpype.source" title="dagpype.source"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.source()</span></tt></a> Function<a class="headerlink" href="#creating-a-source-via-the-dagpype-source-function" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="reference.html#dagpype.source" title="dagpype.source"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.source()</span></tt></a> function takes anything iterable. for example, to create a counter counting from 0 up to 5, we can use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">source</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>or, more generally,</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">counter</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">source</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-a-source-via-the-dagpype-sources-decorator">
+<h3>Creating A Source Via The <a class="reference internal" href="reference.html#dagpype.sources" title="dagpype.sources"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.sources()</span></tt></a> Decorator<a class="headerlink" href="#creating-a-source-via-the-dagpype-sources-decorator" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="reference.html#dagpype.sources" title="dagpype.sources"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.sources()</span></tt></a> decorator transforms a generator function to a source. Thus another way to create a counter is through</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="nd">@sources</span>
+    <span class="k">def</span> <span class="nf">_act</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">i</span>
+    <span class="k">return</span> <span class="n">_act</span>
+</pre></div>
+</div>
+<p>The latter method is more appropriate for sources whose logic is more complex and stateful. Here is the classic
+Fibonacci example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">fib</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="nd">@sources</span>
+    <span class="k">def</span> <span class="nf">_act</span><span class="p">():</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">counter</span> <span class="o">&gt;</span> <span class="n">n</span><span class="p">):</span> <span class="k">return</span>
+            <span class="k">yield</span> <span class="n">a</span>
+            <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">_act</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="filters">
+<span id="filter"></span><h2>Filters<a class="headerlink" href="#filters" title="Permalink to this headline">¶</a></h2>
+<p>A <em>filter</em> is a pipeline stage to which elements are sent, and which sends elements as well.</p>
+<p>A filter, in general, is formed using the <a class="reference internal" href="reference.html#dagpype.filters" title="dagpype.filters"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.filters()</span></tt></a> decorator. Many common filters can be formed using the <a class="reference internal" href="reference.html#dagpype.filt" title="dagpype.filt"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.filt()</span></tt></a> function.</p>
+<div class="section" id="creating-a-filter-via-the-dagpype-filters-decorator">
+<h3>Creating A Filter Via The <a class="reference internal" href="reference.html#dagpype.filters" title="dagpype.filters"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.filters()</span></tt></a> Decorator<a class="headerlink" href="#creating-a-filter-via-the-dagpype-filters-decorator" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="reference.html#dagpype.filters" title="dagpype.filters"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.filters()</span></tt></a> decorator transforms a coroutine function to a filter. The coroutine obtains elements through <tt class="docutils literal"><span class="pre">(yield)</span></tt>, and sends them on through <tt class="docutils literal"><span class="pre">send</span></tt>. The <tt class="xref py py-exc docutils literal"><span class="pre">GeneratorExit</span></tt> exception indicates that no more elements are coming.</p>
+<p>For example, to create an absolute-value filter, we can use</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">abs_</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">_act</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">target</span><span class="o">.</span><span class="n">send</span><span class="p">((</span><span class="k">yield</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">GeneratorExit</span><span class="p">:</span>
+            <span class="n">target</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">_act</span>
+</pre></div>
+</div>
+<p>A filter need not necessarily send an element per element sent to it. Here is an appending filter:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="n">stuff</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_act</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">target</span><span class="o">.</span><span class="n">send</span><span class="p">((</span><span class="k">yield</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">GeneratorExit</span><span class="p">:</span>
+            <span class="n">target</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">stuff</span><span class="p">)</span>
+            <span class="n">target</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">_act</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-a-filter-via-the-dagpype-filt-function">
+<h3>Creating A Filter Via The <a class="reference internal" href="reference.html#dagpype.filt" title="dagpype.filt"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.filt()</span></tt></a> Function<a class="headerlink" href="#creating-a-filter-via-the-dagpype-filt-function" title="Permalink to this headline">¶</a></h3>
+<p>In the very common case where a filter does send at most an element per element sent to it, possibly blocking
+some of them, the helper function <cite>filt</cite> can be used:</p>
+<div class="highlight-python"><pre>def filt(trans = None, pre = None, post = None):
+    """
+    Filter (transform elements and / or suppress them).
+
+    Keyword arguments:
+    trans = Transformation function for each element (default None).
+    pre = Suppression function checked against each element before
+        transformation function, if any (default None).
+    post = Suppression function checked against each element after
+        transformation function, if any (default None).</pre>
+</div>
+<p>The <tt class="xref py py-func docutils literal"><span class="pre">dagpype.abs_()</span></tt> filter, for example, can be written as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="sinks">
+<span id="sink"></span><h2>Sinks<a class="headerlink" href="#sinks" title="Permalink to this headline">¶</a></h2>
+<p>A <em>sink</em> is a pipeline stage to which elements are sent for it to perform some final action.</p>
+<p>A sink, in general, is formed using the <a class="reference internal" href="reference.html#dagpype.sinks" title="dagpype.sinks"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.sinks()</span></tt></a> decorator. Many common sinks can be formed using the <a class="reference internal" href="reference.html#dagpype.sink" title="dagpype.sink"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.sink()</span></tt></a> function.</p>
+<div class="section" id="creating-a-sink-via-the-dagpype-sinks-decorator">
+<h3>Creating A Sink Via The <a class="reference internal" href="reference.html#dagpype.sinks" title="dagpype.sinks"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.sinks()</span></tt></a> Decorator<a class="headerlink" href="#creating-a-sink-via-the-dagpype-sinks-decorator" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="reference.html#dagpype.sinks" title="dagpype.sinks"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.sinks()</span></tt></a> decorator transforms a coroutine function to a filter. The coroutine obtains elements through <cite>(yield)</cite>. It sends its final output in the <tt class="xref py py-exc docutils literal"><span class="pre">GeneratorExit</span></tt> handler.</p>
+<p>For example, to create a sink determining if the sequence has even or odd length, we can use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">odd_count</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">_act</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="p">(</span><span class="k">yield</span><span class="p">)</span>
+                <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="ne">GeneratorExit</span><span class="p">:</span>
+            <span class="c"># This is the final result of the sink.</span>
+            <span class="n">target</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">target</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">_act</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-a-sink-via-the-dagpype-sink-function">
+<h3>Creating A Sink Via The <a class="reference internal" href="reference.html#dagpype.sink" title="dagpype.sink"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.sink()</span></tt></a> Function<a class="headerlink" href="#creating-a-sink-via-the-dagpype-sink-function" title="Permalink to this headline">¶</a></h3>
+<p>There are two common special cases in which a sink can be formed more easily using the <a class="reference internal" href="reference.html#dagpype.sink" title="dagpype.sink"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.sink()</span></tt></a> function.</p>
+<p>In the first case, the desired result is some Python object independent from the input sequence. Calling <a class="reference internal" href="reference.html#dagpype.sink" title="dagpype.sink"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.sink()</span></tt></a> with a Python object (except a function) forms a sink whose output is unconditionally that object. For example:</p>
+<div class="highlight-python"><pre>&gt;&gt; source([1, 2]) | sink('hello')
+'hello'
+
+
+&gt;&gt; source([1, 2, 3]) | sink('hello')
+'hello'</pre>
+</div>
+<p>In the second case, the desired result is the application of a function to the last element of the sequence. Calling <a class="reference internal" href="reference.html#dagpype.sink" title="dagpype.sink"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.sink()</span></tt></a> with a function forms a sink whose output is the application of the function to the last element of the sequence. For example:</p>
+<div class="highlight-python"><pre>&gt;&gt; source([1, 2, 3]) | sink(lambda x : x ** 2)
+9</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Stages</a><ul>
+<li><a class="reference internal" href="#sources">Sources</a><ul>
+<li><a class="reference internal" href="#creating-a-source-via-the-dagpype-source-function">Creating A Source Via The <tt class="docutils literal"><span class="pre">dagpype.source()</span></tt> Function</a></li>
+<li><a class="reference internal" href="#creating-a-source-via-the-dagpype-sources-decorator">Creating A Source Via The <tt class="docutils literal"><span class="pre">dagpype.sources()</span></tt> Decorator</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#filters">Filters</a><ul>
+<li><a class="reference internal" href="#creating-a-filter-via-the-dagpype-filters-decorator">Creating A Filter Via The <tt class="docutils literal"><span class="pre">dagpype.filters()</span></tt> Decorator</a></li>
+<li><a class="reference internal" href="#creating-a-filter-via-the-dagpype-filt-function">Creating A Filter Via The <tt class="docutils literal"><span class="pre">dagpype.filt()</span></tt> Function</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sinks">Sinks</a><ul>
+<li><a class="reference internal" href="#creating-a-sink-via-the-dagpype-sinks-decorator">Creating A Sink Via The <tt class="docutils literal"><span class="pre">dagpype.sinks()</span></tt> Decorator</a></li>
+<li><a class="reference internal" href="#creating-a-sink-via-the-dagpype-sink-function">Creating A Sink Via The <tt class="docutils literal"><span class="pre">dagpype.sink()</span></tt> Function</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="README.html"
+                        title="previous chapter">DAGPype</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="connecting_stages.html"
+                        title="next chapter">Connecting Stages To DAGs</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/stages.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="connecting_stages.html" title="Connecting Stages To DAGs"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="README.html" title="DAGPype"
+             >previous</a> |</li>
+        <li><a href="index.html">DAGPype 0.1.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ami Tavory.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

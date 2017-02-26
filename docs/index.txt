@@ -1,0 +1,33 @@
+DAGPype - Data Processing DAG Pipelines
+=======================================
+
+Contents:
+
+.. toctree::
+    :maxdepth: 2
+
+    README  
+    stages
+    connecting_stages
+    numpy_chunks
+    plotting
+    xml
+    beyond_dags
+    sed
+    perl
+    awk
+    performance
+    reference
+
+    :hidden:     
+     
+        doctest_reference
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+

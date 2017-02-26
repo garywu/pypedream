@@ -1,0 +1,211 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Awk-Like Examples &mdash; DAGPype 0.1.5.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.5.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="DAGPype 0.1.5.0 documentation" href="index.html" />
+    <link rel="next" title="Performance" href="performance.html" />
+    <link rel="prev" title="Perl-Like Examples" href="perl.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="performance.html" title="Performance"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="perl.html" title="Perl-Like Examples"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">DAGPype 0.1.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="awk-like-examples">
+<h1>Awk-Like Examples<a class="headerlink" href="#awk-like-examples" title="Permalink to this headline">¶</a></h1>
+<p>This page contains common examples of common <a class="reference external" href="www.gnu.org/s/gawk/">awk</a>-like operations (taken from <a class="reference external" href="http://www.catonmat.net/series/awk-one-liners-explained">Awk One-Liners Explained</a>) not covered
+in <a class="reference internal" href="sed.html"><em>Sed-Like Examples</em></a> and <a class="reference internal" href="perl.html"><em>Perl-Like Examples</em></a>.</p>
+<div class="figure">
+<img alt="awk" src="_images/awk-programming-one-liners-explained.jpg" />
+</div>
+<div class="section" id="numbering-and-calculations">
+<h2>Numbering and Calculations<a class="headerlink" href="#numbering-and-calculations" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic" start="15">
+<li><p class="first">Find the line containing the largest (numeric) first field.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="nb">enumerate</span><span class="p">()</span><span class="n">_</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">min_</span><span class="p">()</span> <span class="o">|</span> <span class="n">select_inds</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The first two stages,</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="nb">enumerate</span><span class="p">()</span><span class="n">_</span>
+</pre></div>
+</div>
+<p>enumerates the first fields of the lines.</p>
+<p>The next stage,</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>reverses the tuples. Using Python&#8217;s lexicographic ordering,</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">min_</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>extracts the tuple with the smallest value. The enumeration is retrieved using</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">select_inds</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="last">(note the use of <a class="reference internal" href="connecting_stages.html#sink-chaining"><em>sink chaining</em></a>).</p>
+</div>
+</li>
+</ol>
+<ol class="arabic" start="17">
+<li><p class="first">Print the last field of each line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">select_inds</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Print the last field of the last line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">select_inds</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">nth</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+<div class="section" id="text-conversion-and-substitution">
+<h2>Text Conversion and Substitution<a class="headerlink" href="#text-conversion-and-substitution" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic" start="38">
+<li><p class="first">Print the first two fields in reverse order on each line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">select_inds</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Swap first field with second on every line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">,</span><span class="si">%s</span><span class="s">,</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span> <span class="p">])))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><dl class="first docutils">
+<dt>Delete the second field on each line.</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">,</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span> <span class="p">])))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Print the fields in reverse order on every line.</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">lle</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">l</span><span class="p">)))</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+</ol>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Awk-Like Examples</a><ul>
+<li><a class="reference internal" href="#numbering-and-calculations">Numbering and Calculations</a></li>
+<li><a class="reference internal" href="#text-conversion-and-substitution">Text Conversion and Substitution</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="perl.html"
+                        title="previous chapter">Perl-Like Examples</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="performance.html"
+                        title="next chapter">Performance</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/awk.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="performance.html" title="Performance"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="perl.html" title="Perl-Like Examples"
+             >previous</a> |</li>
+        <li><a href="index.html">DAGPype 0.1.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ami Tavory.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

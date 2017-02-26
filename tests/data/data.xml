@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<stuff>
+	<day>1</day>
+	<wind>2</wind>
+	<hail>3</hail>
+	<rain>4</rain>
+
+	<day>1</day>
+	<wind>4</wind>
+	<hail>5</hail>
+	<rain>6</rain>
+
+	<day>2</day>
+	<wind>7</wind>
+	<hail>29</hail>
+	<rain>3</rain>
+
+	<day>2</day>
+	<wind>23</wind>
+	<hail>3</hail>
+	<rain>3</rain>
+
+	<day>3</day>
+	<wind>0</wind>
+	<hail>0</hail>
+	<rain>1</rain>
+
+</stuff>
+

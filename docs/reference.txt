@@ -1,0 +1,27 @@
+=========
+Reference
+=========
+
+-------
+dagpype
+-------
+
+.. automodule:: dagpype
+   :members:
+
+
+----------
+dagpype.np
+----------
+
+.. automodule:: dagpype.np
+   :members:
+
+
+------------
+dagpype.plot
+------------
+
+.. automodule:: dagpype.plot
+   :members:
+

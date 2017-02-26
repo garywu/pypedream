@@ -1,0 +1,515 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>DAGPype &mdash; DAGPype 0.1.5.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.5.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="DAGPype 0.1.5.0 documentation" href="index.html" />
+    <link rel="next" title="Stages" href="stages.html" />
+    <link rel="prev" title="DAGPype - Data Processing DAG Pipelines" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="stages.html" title="Stages"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="DAGPype - Data Processing DAG Pipelines"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">DAGPype 0.1.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dagpype">
+<h1>DAGPype<a class="headerlink" href="#dagpype" title="Permalink to this headline">¶</a></h1>
+<p>This is a Python framework for scientific data-processing and data-preparation DAG (directed acyclic graph) pipelines.</p>
+<p>It is designed to work well within Python scripts or <a class="reference external" href="http://ipython.org/">IPython</a>, provide an in-Python alternative for <a class="reference external" href="http://www.gnu.org/software/sed/">sed</a>, <a class="reference external" href="http://www.gnu.org/software/gawk/">awk</a>, <a class="reference external" href="http://www.perl.org">perl</a>, and <a class="reference external" href="http://www.gnu.org/software/grep/">grep</a>, and complement libraries such as <a class="reference external" href="http://www.numpy.org/">NumPy</a>/<a class="reference external" href="http://www.scipy.org/">SciPy</a>, <a class="reference external" href="http://scikits.appspot.com/">SciKits</a>, <a class="reference external" href="http://pandas.pydata.org/">pandas</a>, <a class="reference external" href="http://mayavi.sourceforge.net/">MayaVi</a>, <a class="reference external" href="http://www.pytables.org/moin">PyTables</a>, and so forth. Those libraries process data once it has been assembled. This library is for flexible data assembly and quick exploration, or for aggregating huge data which cannot be reasonably assembled.</p>
+<div class="section" id="motivating-example">
+<h2>Motivating Example<a class="headerlink" href="#motivating-example" title="Permalink to this headline">¶</a></h2>
+<p>Suppose we wish to check the correlation between the &#8216;wind&#8217; and &#8216;rain&#8217; columns in a <a class="reference external" href="http://en.wikipedia.org/wiki/Comma-separated_values">CSV</a> file, excluding all entries with values larger than 10 as outliers.</p>
+<p>Here is some straightforward code that does this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">r</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;wind&#39;</span><span class="p">,</span> <span class="s">&#39;rain&#39;</span><span class="p">))</span>
+
+<span class="n">sx</span><span class="p">,</span> <span class="n">sxx</span><span class="p">,</span> <span class="n">sy</span><span class="p">,</span> <span class="n">syy</span><span class="p">,</span> <span class="n">sxy</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">r</span><span class="p">:</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s">&#39;wind&#39;</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s">&#39;rain&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="mi">10</span> <span class="ow">and</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="n">sx</span> <span class="o">+=</span> <span class="n">x</span>
+        <span class="n">sxx</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span>
+        <span class="n">sy</span> <span class="o">+=</span> <span class="n">y</span>
+        <span class="n">sxy</span> <span class="o">+=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">y</span>
+        <span class="n">syy</span> <span class="o">+=</span> <span class="n">y</span> <span class="o">*</span> <span class="n">y</span>
+        <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">sxy</span> <span class="o">-</span> <span class="n">sx</span> <span class="o">*</span> <span class="n">sy</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">sxx</span> <span class="o">-</span> <span class="n">sx</span> <span class="o">*</span> <span class="n">sx</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">syy</span> <span class="o">-</span> <span class="n">sy</span> <span class="o">*</span> <span class="n">sy</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This code is relatively long. The source-reading logic, filtering logic, and calculation logic, are not
+cleanly separated; the code cannot flexibly deal with changes to the data format from CSV to something else, for example.</p>
+<p>Alternatively, here is some NumPy-based code that does this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;wind&#39;</span><span class="p">,</span> <span class="s">&#39;rain&#39;</span><span class="p">),</span> <span class="n">delimiter</span> <span class="o">=</span> <span class="s">&#39;,&#39;</span><span class="p">,</span> <span class="n">skip_header</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+<span class="n">wind</span> <span class="o">=</span> <span class="p">[</span><span class="n">wind</span> <span class="k">for</span> <span class="p">(</span><span class="n">wind</span><span class="p">,</span> <span class="n">rain</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">if</span> <span class="n">wind</span> <span class="o">&lt;</span> <span class="mi">10</span> <span class="ow">and</span> <span class="n">rain</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">]</span>
+<span class="n">rain</span> <span class="o">=</span> <span class="p">[</span><span class="n">rain</span> <span class="k">for</span> <span class="p">(</span><span class="n">wind</span><span class="p">,</span> <span class="n">rain</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">if</span> <span class="n">wind</span> <span class="o">&lt;</span> <span class="mi">10</span> <span class="ow">and</span> <span class="n">rain</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">]</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">wind</span><span class="p">,</span> <span class="n">rain</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This code is shorter and more separated, but the <tt class="docutils literal"><span class="pre">numpy.genfromtxt</span></tt> call loads the entire dataset into memory, which can be very inefficient.</p>
+<p>Conversely, using this library, the code becomes (assuming having typed <tt class="docutils literal"><span class="pre">from</span> <span class="pre">dagpype</span> <span class="pre">import</span> <span class="pre">*</span></tt>):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">b</span><span class="s">&#39;wind&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s">&#39;rain&#39;</span><span class="p">))</span> <span class="o">|</span> \
+<span class="gp">... </span>   <span class="n">filt</span><span class="p">(</span><span class="n">pre</span> <span class="o">=</span> <span class="k">lambda</span> <span class="p">(</span><span class="n">wind</span><span class="p">,</span> <span class="n">rain</span><span class="p">)</span> <span class="p">:</span> <span class="n">wind</span> <span class="o">&lt;</span> <span class="mi">10</span> <span class="ow">and</span> <span class="n">rain</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>   <span class="n">corr</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>which processes the data efficiently, and, moreover, is short enough to use from the command line for quick data exploration.</p>
+</div>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<p>The library has the following features:</p>
+<ul class="simple">
+<li>Pipelines have low memory footprint, even when processing large datasets.</li>
+<li>Reusable pipe stages can be written easily and combined flexibly. The resulting pipelines can be used from within scripts or Python&#8217;s interactive interpreter.</li>
+<li>In-Python pipelines are a viable alternative to relatively-specialized utilities such as <a class="reference external" href="http://www.gnu.org/software/gawk/">awk</a>, <a class="reference external" href="http://www.gnu.org/software/sed/">sed</a>, <a class="reference external" href="http://www.perl.org">perl</a>, <a class="reference external" href="http://www.gnu.org/software/grep/">grep</a>, etc.</li>
+<li>Stage combination has the expressiveness needed for common data processing tasks:<ul>
+<li>Full combination of pipe elements to DAGs (Directed Acyclic Graphs)</li>
+<li>On-the-fly creation, by pipe elements, of sub-pipelines, for common SQL-type operations</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="download-installation-documentation-and-bugtracking">
+<h2>Download, Installation, Documentation, And Bugtracking<a class="headerlink" href="#download-installation-documentation-and-bugtracking" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">The package is at <a class="reference external" href="http://pypi.python.org/pypi/DAGPype">PyPI</a>.</p>
+<blockquote>
+<div></div></blockquote>
+</li>
+<li><p class="first">The usual setup for Python libraries is used. Type:</p>
+<blockquote>
+<div><p><tt class="docutils literal"><span class="pre">$</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">dagpype</span></tt></p>
+<p>or</p>
+<p><tt class="docutils literal"><span class="pre">$</span> <span class="pre">sudo</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">dagpype</span></tt></p>
+<blockquote>
+<div><div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>To install this package from the source distribution, the system must have a C++ compiler installed. The setup script will invoke this compiler.</p>
+<p>Using Python 2.* on Windows will attempt to invoke Visual Studio 2008. If you are using a Visual Studio 2010 or 2012, download and extract the archive. From within the DAGPype directory, use</p>
+<p><tt class="docutils literal"><span class="pre">&gt;</span> <span class="pre">SET</span> <span class="pre">VS90COMNTOOLS=%VS100COMNTOOLS%</span></tt></p>
+<p>or</p>
+<p><tt class="docutils literal"><span class="pre">&gt;</span> <span class="pre">SET</span> <span class="pre">VS90COMNTOOLS=%VS110COMNTOOLS%</span></tt></p>
+<p>(for Visual Studio 2010 and 2012, respectively), followed by</p>
+<p class="last"><tt class="docutils literal"><span class="pre">&gt;</span> <span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">install</span></tt></p>
+</div>
+</div></blockquote>
+</div></blockquote>
+</li>
+<li><p class="first">The documentation is hosted at <a class="reference external" href="http://packages.python.org/DAGPype/">PyPI Docs</a> and can also be found in the &#8216;docs&#8217; directory of the distribution.</p>
+<blockquote>
+<div></div></blockquote>
+</li>
+<li><p class="first">Bugtracking is on <a class="reference external" href="http://code.google.com/p/dagpype/issues/list?can=1&amp;q=">Google Code</a>.</p>
+<blockquote>
+<div></div></blockquote>
+</li>
+</ul>
+</div>
+<div class="section" id="a-few-quick-examples">
+<h2>A Few Quick Examples<a class="headerlink" href="#a-few-quick-examples" title="Permalink to this headline">¶</a></h2>
+<p>(See more online <a class="reference external" href="http://packages.python.org/DAGPype/sed.html">sed-like</a>, <a class="reference external" href="http://packages.python.org/DAGPype/perl.html">perl-like</a>, and <a class="reference external" href="http://packages.python.org/DAGPype/awk.html">awk-like</a> examples)</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The following examples assume first typing <tt class="docutils literal"><span class="pre">from</span> <span class="pre">dagpype</span> <span class="pre">import</span> <span class="pre">*</span></tt></p>
+</div>
+<ol class="arabic">
+<li><dl class="first docutils">
+<dt>Find the correlation between the data in two different files, &#8216;wind.txt&#8217;, and &#8216;rain.txt&#8217;:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;wind.txt&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;rain.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">corr</span><span class="p">()</span>
+<span class="go">0.74</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Find the average, standard deviation, min and max, of the contents of &#8216;rain.txt&#8217;:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;wind.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">mean</span><span class="p">()</span> <span class="o">+</span> <span class="n">stddev</span><span class="p">()</span> <span class="o">+</span> <span class="n">min_</span><span class="p">()</span> <span class="o">+</span> <span class="n">max_</span><span class="p">()</span>
+<span class="go">(3, 0.4, 0, 9)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Truncate outliers from the &#8216;wind&#8217; and &#8216;rain&#8217; columns of &#8216;meteo.csv&#8217;:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">b</span><span class="s">&#39;wind&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s">&#39;rain&#39;</span><span class="p">))</span> <span class="o">|</span> \
+<span class="gp">... </span>   <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">wind</span><span class="p">,</span> <span class="n">rain</span><span class="p">)</span> <span class="p">:</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">wind</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">rain</span><span class="p">,</span> <span class="mi">10</span><span class="p">)))</span> <span class="o">|</span> \
+<span class="gp">... </span>   <span class="n">to_csv</span><span class="p">(</span><span class="s">&#39;fixed_data.csv&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">b</span><span class="s">&#39;wind&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s">&#39;rain&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Create a numpy.array from the values of &#8216;wind.txt&#8217;:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">v</span> <span class="o">=</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;wind.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">to_array</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Create a list of the values of &#8216;rain.txt&#8217;, excluding the first 3 and last 4:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">v</span> <span class="o">=</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;rain.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">skip</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">|</span> <span class="n">skip</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>From &#8216;meteo.csv&#8217;, summarize consecutive &#8216;wind&#8217; values with the same &#8216;day&#8217; value by their average and standard deviation; write the result into &#8216;day_wind.csv&#8217;:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">b</span><span class="s">&#39;day&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s">&#39;wind&#39;</span><span class="p">))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">group</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">wind</span><span class="p">)</span> <span class="p">:</span> <span class="n">day</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">key_pipe</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">day</span> <span class="p">:</span> <span class="n">sink</span><span class="p">(</span><span class="n">day</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">select_inds</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">mean</span><span class="p">())</span> <span class="o">+</span> <span class="p">(</span><span class="n">select_inds</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">stddev</span><span class="p">()))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_csv</span><span class="p">(</span><span class="s">&#39;day_wind.csv&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">b</span><span class="s">&#39;day&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s">&#39;mean&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s">&#39;stddev&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Find the autocorrelation of the values of &#8216;wind.txt&#8217;, shifted 5 to the past and 5 to the future:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;wind.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">skip_n</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span> <span class="o">+</span> <span class="n">skip_n</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">|</span> <span class="n">corr</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Find the correlation between smoothed versions of the &#8216;wind&#8217; and &#8216;rain&#8217; columns of &#8216;meteo.csv&#8217;:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">b</span><span class="s">&#39;wind&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s">&#39;rain&#39;</span><span class="p">))</span> <span class="o">|</span> \
+<span class="gp">... </span>   <span class="p">(</span><span class="n">select_inds</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="n">low_pass_filter</span><span class="p">(</span><span class="mf">0.5</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="n">select_inds</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">low_pass_filter</span><span class="p">(</span><span class="mf">0.5</span><span class="p">))</span> <span class="o">|</span> \
+<span class="gp">... </span>   <span class="n">corr</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Sample approximately 1% of the elements in the &#8216;rain&#8217; column of &#8216;meteo.csv&#8217;, and use them to approximate the median:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="s">&#39;rain&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">prob_rand_sample</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">to_array</span><span class="p">()</span> <span class="o">|</span> <span class="n">sink</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span> <span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Sample approximately 100 of the elements in the &#8216;rain&#8217; column of &#8216;meteo.csv&#8217; (with replacement), and use them to approximate the median:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="s">&#39;rain&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">size_rand_sample</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">to_array</span><span class="p">()</span> <span class="o">|</span> <span class="n">sink</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span> <span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Use stages with regular Python conditionals. The following shows how a stage can be selected at runtime; if <tt class="docutils literal"><span class="pre">debug</span></tt> is used, a trace stage - tracing the elements piped through it - will be used, otherwise, a relay stage - passing elements passed through it - will be used:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">debug</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;wind.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">trace</span><span class="p">()</span> <span class="k">if</span> <span class="n">debug</span> <span class="k">else</span> <span class="n">relay</span><span class="p">())</span> <span class="o">|</span> <span class="n">sum_</span><span class="p">()</span>
+<span class="go">0 : 2.0</span>
+<span class="go">1 : 4.0</span>
+<span class="go">2 : 7.0</span>
+<span class="go">3 : 23.0</span>
+<span class="gp">...</span>
+<span class="go">57 : 7.0</span>
+<span class="go">58 : 23.0</span>
+<span class="go">59 : 0.0</span>
+<span class="go">432.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">debug</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;wind.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">trace</span><span class="p">()</span> <span class="k">if</span> <span class="n">debug</span> <span class="k">else</span> <span class="n">relay</span><span class="p">())</span> <span class="o">|</span> <span class="n">sum_</span><span class="p">()</span>
+<span class="go">432.0</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Use regular Python functions returning sub-pipes. The following function takes a file name, and returns a pipeline of the exponential average of the absolute values of its values, which is then used for finding a correlation:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">abs_exp_ave</span><span class="p">(</span><span class="n">f_name</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">stream_vals</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span> <span class="o">|</span> <span class="n">abs_</span><span class="p">()</span> <span class="o">|</span> <span class="n">exp_ave</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">abs_exp_ave</span><span class="p">(</span><span class="s">&#39;foo.dat&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">abs_exp_ave</span><span class="p">(</span><span class="s">&#39;bar.dat&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">corr</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Use pipelines within regular Python list comprehension. The following creates a list of means and standard deviations of the contents of the files in some directory</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stats</span> <span class="o">=</span> <span class="p">[</span><span class="n">stream_vals</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">|</span> <span class="n">mean</span><span class="p">()</span> <span class="o">+</span> <span class="n">stddev</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s">&#39;dir/*.txt&#39;</span><span class="p">)]</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>From &#8216;meteo.csv&#8217;, summarize consecutive &#8216;wind&#8217; values with the same &#8216;day&#8217; value by their average; plot the cumulative average of these day averages:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">b</span><span class="s">&#39;day&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s">&#39;wind&#39;</span><span class="p">))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">group</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">wind</span><span class="p">)</span> <span class="p">:</span> <span class="n">day</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">day</span> <span class="p">:</span> <span class="n">select_inds</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">mean</span><span class="p">())</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">cum_ave</span><span class="p">()</span> <span class="o">|</span> <span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span> <span class="o">|</span> <span class="n">plot</span><span class="o">.</span><span class="n">show</span><span class="p">())</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>From &#8216;meteo.csv&#8217;, summarize consecutive &#8216;wind&#8217; values with the same &#8216;day&#8217; value by their median; plot the cumulative average of these day medians:</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">b</span><span class="s">&#39;day&#39;</span><span class="p">,</span> <span class="n">b</span><span class="s">&#39;wind&#39;</span><span class="p">))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">group</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="k">lambda</span> <span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">wind</span><span class="p">)</span> <span class="p">:</span> <span class="n">day</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="k">lambda</span> <span class="n">day</span> <span class="p">:</span> <span class="n">select_inds</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">to_array</span><span class="p">()</span> <span class="o">|</span> <span class="n">sink</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span> <span class="p">:</span> <span class="n">median</span><span class="p">(</span><span class="n">a</span><span class="p">)))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">cum_ave</span><span class="p">()</span> <span class="o">|</span> <span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span> <span class="o">|</span> <span class="n">plot</span><span class="o">.</span><span class="n">show</span><span class="p">())</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+</ol>
+</div>
+<div class="section" id="changes">
+<h2>Changes<a class="headerlink" href="#changes" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<caption>Changes</caption>
+<colgroup>
+<col width="15%" />
+<col width="15%" />
+<col width="70%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Version</th>
+<th class="head">Date</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>0.1.5.1</td>
+<td>19/04/2013</td>
+<td>NumPy 1.7.1 Compilation bugfix</td>
+</tr>
+<tr class="row-odd"><td>0.1.5</td>
+<td>18/04/2013</td>
+<td>Doctest in unittests: numerous doc bugfixes, illegal floats parse bugfix</td>
+</tr>
+<tr class="row-even"><td>0.1.4.0</td>
+<td>18/02/2013</td>
+<td>CSV parser IEEE exception bugfix, offline docs bugfix</td>
+</tr>
+<tr class="row-odd"><td>0.1.3.9</td>
+<td>03/02/2013</td>
+<td>Python 2.6 backport</td>
+</tr>
+<tr class="row-even"><td>0.1.3.8</td>
+<td>28/01/2013</td>
+<td>OS X build bugfixes</td>
+</tr>
+<tr class="row-odd"><td>0.1.3.7</td>
+<td>18/01/2013</td>
+<td>Windows build / IO bugfixes</td>
+</tr>
+<tr class="row-even"><td>0.1.3.6</td>
+<td>16/01/2013</td>
+<td>Py3K</td>
+</tr>
+<tr class="row-odd"><td>0.1.3.5</td>
+<td>15/01/2013</td>
+<td>CSV parser bugfix, Perl, Awk, and Sed type stages, GNU/Linux gather-IO backend</td>
+</tr>
+<tr class="row-even"><td>0.1.3.4</td>
+<td>05/01/2013</td>
+<td>Moving to PyPI</td>
+</tr>
+<tr class="row-odd"><td>0.1.3.3</td>
+<td>02/01/2013</td>
+<td>Consecutive vs. non-consecutive grouping, import bugfix</td>
+</tr>
+<tr class="row-even"><td>0.1.3.2</td>
+<td>20/12/2012</td>
+<td>CSV filter stage</td>
+</tr>
+<tr class="row-odd"><td>0.1.3.1</td>
+<td>12/12/2012</td>
+<td>Missing extension bugfix</td>
+</tr>
+<tr class="row-even"><td>0.1.3</td>
+<td>12/12/2012</td>
+<td>Optimized C numpy IO</td>
+</tr>
+<tr class="row-odd"><td>0.1.2.3</td>
+<td>7/12/2012</td>
+<td>Bugfix (stream_vals)</td>
+</tr>
+<tr class="row-even"><td>0.1.2.2</td>
+<td>3/12/2012</td>
+<td>Bugfixes (VC++, select_inds)</td>
+</tr>
+<tr class="row-odd"><td>0.1.2.1</td>
+<td>2/12/2012</td>
+<td>Better pyplot keyword args support</td>
+</tr>
+<tr class="row-even"><td>0.1.2</td>
+<td>29/11/2012</td>
+<td>Various plotting stages</td>
+</tr>
+<tr class="row-odd"><td>0.1.1.3</td>
+<td>29/11/2012</td>
+<td>Rand size samples, text/regex grep</td>
+</tr>
+<tr class="row-even"><td>0.1.1.1</td>
+<td>20/10/2012</td>
+<td>More moving averages, min/max, quantiles, etc.</td>
+</tr>
+<tr class="row-odd"><td>0.1.1</td>
+<td>20/10/2012</td>
+<td>Optimized C CSV reader</td>
+</tr>
+<tr class="row-even"><td>0.1.0.3</td>
+<td>30/9/2012</td>
+<td>Py3 compatibility</td>
+</tr>
+<tr class="row-odd"><td>0.1.0.2</td>
+<td>28/9/2012</td>
+<td>More numpy stages</td>
+</tr>
+<tr class="row-even"><td>0.1.0.1</td>
+<td>22/9/2012</td>
+<td>Setup bugfix</td>
+</tr>
+<tr class="row-odd"><td>0.1.0</td>
+<td>18/8/2012</td>
+<td>Initial release</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
+<p>This library uses many ideas from David Beazley&#8217;s generator talk <a class="reference internal" href="#beazley08">[Beazley08]</a> and coroutine talk <a class="reference internal" href="#beazley09">[Beazley09]</a></p>
+<table class="docutils citation" frame="void" id="beazley08" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[Beazley08]</a></td><td><a class="reference external" href="http://www.dabeaz.com/generators/">http://www.dabeaz.com/generators/</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="beazley09" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[Beazley09]</a></td><td><a class="reference external" href="http://www.dabeaz.com/coroutines/">http://www.dabeaz.com/coroutines/</a></td></tr>
+</tbody>
+</table>
+<p>Many thanks to Anand Jeyahar, Brad Reisfeld, Tal Kremerman, Eran Segal, and Simon Pantzare for patches.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">DAGPype</a><ul>
+<li><a class="reference internal" href="#motivating-example">Motivating Example</a></li>
+<li><a class="reference internal" href="#features">Features</a></li>
+<li><a class="reference internal" href="#download-installation-documentation-and-bugtracking">Download, Installation, Documentation, And Bugtracking</a></li>
+<li><a class="reference internal" href="#a-few-quick-examples">A Few Quick Examples</a></li>
+<li><a class="reference internal" href="#changes">Changes</a></li>
+<li><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">DAGPype - Data Processing DAG Pipelines</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="stages.html"
+                        title="next chapter">Stages</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/README.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="stages.html" title="Stages"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="DAGPype - Data Processing DAG Pipelines"
+             >previous</a> |</li>
+        <li><a href="index.html">DAGPype 0.1.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ami Tavory.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

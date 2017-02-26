@@ -1,0 +1,6 @@
+abar
+bfoo
+cfoodbar
+
+dfoobar
+foobar

@@ -1,0 +1,260 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>NumPy And High-Performance Chunking &mdash; DAGPype 0.1.5.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.5.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="DAGPype 0.1.5.0 documentation" href="index.html" />
+    <link rel="next" title="Plotting" href="plotting.html" />
+    <link rel="prev" title="Connecting Stages To DAGs" href="connecting_stages.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plotting.html" title="Plotting"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="connecting_stages.html" title="Connecting Stages To DAGs"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">DAGPype 0.1.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="numpy-and-high-performance-chunking">
+<h1>NumPy And High-Performance Chunking<a class="headerlink" href="#numpy-and-high-performance-chunking" title="Permalink to this headline">¶</a></h1>
+<p>This page contains two sections related to <a class="reference external" href="http://www.numpy.org/">NumPy</a>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference internal" href="#numpy-array-sinks">NumPy Array Sinks</a> describes how to transform the output of a pipeline to a NumPy array, and some points regarding this.</li>
+<li><a class="reference internal" href="#high-performance-chunking">High Performance Chunking</a> describes stages that chunk the data internally for high performance. Each such stage uses NumPy arrays internally.</li>
+</ul>
+</div></blockquote>
+<p>The relevant stages are in the <a class="reference internal" href="reference.html#module-dagpype.np" title="dagpype.np"><tt class="xref py py-mod docutils literal"><span class="pre">dagpype.np</span></tt></a> sub-package.</p>
+<div class="section" id="numpy-array-sinks">
+<h2>NumPy Array Sinks<a class="headerlink" href="#numpy-array-sinks" title="Permalink to this headline">¶</a></h2>
+<p>Much of the purpose of this library is for preprocessing data for further processing using other Python libraries.</p>
+<p>To build a pipe resulting in a NumPy array, we can do something like one of the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;rain.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">to_array</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">&lt;type &#39;numpy.ndarray&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(61,)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;wind&#39;</span><span class="p">,</span> <span class="s">&#39;rain&#39;</span><span class="p">))</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">to_array</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">&lt;type &#39;numpy.ndarray&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(60, 2)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;wind&#39;</span><span class="p">,</span> <span class="s">&#39;rain&#39;</span><span class="p">))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="n">pre</span> <span class="o">=</span> <span class="k">lambda</span> <span class="p">(</span><span class="n">wind</span><span class="p">,</span> <span class="n">rain</span><span class="p">)</span> <span class="p">:</span> <span class="n">wind</span> <span class="o">&lt;</span> <span class="mi">10</span> <span class="ow">and</span> <span class="n">rain</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">np</span><span class="o">.</span><span class="n">to_array</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">&lt;type &#39;numpy.ndarray&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(48, 2)</span>
+</pre></div>
+</div>
+<p>If the the sole reason we&#8217;re creating an array is for applying a NumPy function, we can <a class="reference internal" href="connecting_stages.html#sink-chaining"><em>chain sinks</em></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="s">&#39;rain&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">to_array</span><span class="p">()</span> <span class="o">|</span> <span class="n">sink</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span> <span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">a</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>and, of course, we can apply more than a single function to the array, like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="s">&#39;rain&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="p">(</span><span class="n">to_array</span><span class="p">()</span> <span class="o">|</span> <span class="n">sink</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span> <span class="p">:</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">kurtosis</span><span class="p">(</span><span class="n">a</span><span class="p">))))</span>
+</pre></div>
+</div>
+<p>or like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="s">&#39;rain&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="p">(</span><span class="n">to_array</span><span class="p">()</span> <span class="o">|</span> <span class="n">sink</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span> <span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">a</span><span class="p">))</span> <span class="o">+</span> <span class="n">sink</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span> <span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">kurtosis</span><span class="p">(</span><span class="n">a</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>Some aggregates, e.g., the median, cannot be calculated (or even approximated) using constant memory. This might cause a problem if the dataset is large. In such cases, we can use sub-sampling.  The following samples approximately 1%
+of the elements, and uses them to find the median:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="s">&#39;rain&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">prob_rand_sample</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">to_array</span><span class="p">()</span> <span class="o">|</span> <span class="n">sink</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span> <span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The following samples (with replacement) 100 of the elements, then uses them to find the median:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="s">&#39;rain&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">size_rand_sample</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">to_array</span><span class="p">()</span> <span class="o">|</span> <span class="n">sink</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span> <span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Other aggregates can be calculated using constant memory. In this case, using a DAGPype stage is more efficient than first streaming into a NumPy array, then calculating the aggregate. E.g., finding the mean through an array, like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="s">&#39;rain&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">to_array</span><span class="p">()</span> <span class="o">|</span> <span class="n">sink</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span> <span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">a</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>can use much more memory than this version</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="s">&#39;rain&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">ave</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="high-performance-chunking">
+<h2>High Performance Chunking<a class="headerlink" href="#high-performance-chunking" title="Permalink to this headline">¶</a></h2>
+<p>Modern numeric libraries process data more efficiently in chunks. Even if the original data is logically a sequence of individual elements, we can utilize stages that chunk it, then process these chunks. The size of the chunks depends on the system: they should be large enough to take advantage of the chunk performance of the numerical library, but not so large that they overburden system memory.</p>
+<p>See the <a class="reference internal" href="performance.html"><em>Performance</em></a> page for the effect.</p>
+<div class="figure">
+<a class="reference internal image-reference" href="_images/Chunking.png"><img alt="Chunking" src="_images/Chunking.png" style="width: 102.5px; height: 309.5px;" /></a>
+</div>
+<p>E.g., the following code snippet shows how to calculate the correlation between two variables stored in a binary format:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">print</span> <span class="n">np</span><span class="o">.</span><span class="n">chunk_stream_bytes</span><span class="p">(</span><span class="n">_f_name</span><span class="p">,</span> <span class="n">num_cols</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The first stage streams chunks of data into arrays, in this case of 2 columns. The second stage calculates their correlation. If the file is in CSV format, we can do the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">np</span><span class="o">.</span><span class="n">chunk_stream_vals</span><span class="p">(</span><span class="s">&#39;meteo.csv&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;day&#39;</span><span class="p">,</span> <span class="s">&#39;wind&#39;</span><span class="p">))</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The first stage reads the &#8216;day&#8217; and &#8216;wind&#8217; columns from the CSV file, and emits tuples of chunks.</p>
+<p>A stream of individual elements can be chunked to a stream of NumPy arrays using the <a class="reference internal" href="reference.html#dagpype.np.chunk" title="dagpype.np.chunk"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.np.chunk()</span></tt></a> stage, then processed using other <a class="reference internal" href="reference.html#module-dagpype.np" title="dagpype.np"><tt class="xref py py-mod docutils literal"><span class="pre">dagpype.np</span></tt></a> stages:</p>
+<div class="highlight-python"><pre>&gt;&gt; source([1, 2, 3, 4]) | np.chunk() | np.mean()</pre>
+</div>
+<p>its complementary stage is <a class="reference internal" href="reference.html#dagpype.np.unchunk" title="dagpype.np.unchunk"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.np.unchunk()</span></tt></a>.</p>
+<p>The stages that actively chunk data from a stream in <a class="reference internal" href="reference.html#module-dagpype.np" title="dagpype.np"><tt class="xref py py-mod docutils literal"><span class="pre">dagpype.np</span></tt></a> take the required chunk size as a parameter. For example, <a class="reference internal" href="reference.html#dagpype.np.chunk_stream_bytes" title="dagpype.np.chunk_stream_bytes"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.np.chunk_stream_bytes()</span></tt></a> has the following interface:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">chunk_stream_bytes</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">max_elems</span> <span class="o">=</span> <span class="mi">8192</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">num_cols</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads a binary file containing a numpy.array, and emits a series of chunks. Each chunk</span>
+<span class="sd">        is a numpy array with num_cols columns.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        stream -- Either the name of a file or a *binary* stream.</span>
+
+<span class="sd">    Keyword Arguments:</span>
+<span class="sd">        max_elems -- Number of rows per chunk (last might have less) (default 8192).</span>
+<span class="sd">        dtype -- Underlying element type (default numpy.float64)</span>
+<span class="sd">        num_cols -- Number of columns in the chunks&#39; arrays (default 1).</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        np.chunk_stream_vals</span>
+<span class="sd">        np.chunks_to_stream_bytes</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    &gt;&gt;&gt; # Reads from a binary file, and writes the cumulative average to a different one.</span>
+<span class="sd">    &gt;&gt;&gt; np.chunk_stream_bytes(&#39;foo.dat&#39;) | np.cum_ave() | np.chunks_to_stream_bytes(&#39;wind_ave.dat&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>A stream of chunks can be processed by either stages in <a class="reference internal" href="reference.html#module-dagpype.np" title="dagpype.np"><tt class="xref py py-mod docutils literal"><span class="pre">dagpype.np</span></tt></a> or <a class="reference internal" href="reference.html#module-dagpype" title="dagpype"><tt class="xref py py-mod docutils literal"><span class="pre">dagpype</span></tt></a>, however, the stages in <a class="reference internal" href="reference.html#module-dagpype.np" title="dagpype.np"><tt class="xref py py-mod docutils literal"><span class="pre">dagpype.np</span></tt></a> semantically deal with the elements composing the array, whereas those in <a class="reference internal" href="reference.html#module-dagpype" title="dagpype"><tt class="xref py py-mod docutils literal"><span class="pre">dagpype</span></tt></a> consider the arrays the elements themselves. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">source</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">chunk</span><span class="p">()</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="go">4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">source</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">chunk</span><span class="p">()</span> <span class="o">|</span> <span class="n">count</span><span class="p">()</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+<p>In the above two examples, <a class="reference internal" href="reference.html#dagpype.np.chunk" title="dagpype.np.chunk"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.np.chunk()</span></tt></a> happened to chunk the 4 elements into a single chunk. The first pipeline counted the total number of elements in the chunks as 4, and the second pipeline counted a single chunk.</p>
+<p>Given NumPy&#8217;s wealth of ways to manipulate arrays, it is often possible to manipulate a chunked stream by using
+<a class="reference internal" href="reference.html#module-dagpype" title="dagpype"><tt class="xref py py-mod docutils literal"><span class="pre">dagpype</span></tt></a>&#8216;s <a class="reference internal" href="reference.html#dagpype.filt" title="dagpype.filt"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.filt()</span></tt></a> function with NumPy constructs, instead of writing specialized chunk-aware stages. For example, to calculate the correlation, pruning out values greater than 10 in each of some data, we can use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">np</span><span class="o">.</span><span class="n">chunk_stream_bytes</span><span class="p">(</span><span class="n">_f_name</span><span class="p">,</span> <span class="n">num_cols</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">|</span> \
+    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span> <span class="p">:</span> <span class="n">a</span><span class="p">[</span><span class="n">logical_and</span><span class="p">(</span><span class="n">a</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">,</span> <span class="n">a</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">),</span> <span class="p">:])</span> <span class="o">|</span> \
+    <span class="n">np</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>and to truncate outliers to 10, we can use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">np</span><span class="o">.</span><span class="n">chunk_stream_bytes</span><span class="p">(</span><span class="n">_f_name</span><span class="p">,</span> <span class="n">num_cols</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">|</span> \
+    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span> <span class="p">:</span> <span class="n">where</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span> <span class="o">|</span> \
+    <span class="n">np</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">NumPy And High-Performance Chunking</a><ul>
+<li><a class="reference internal" href="#numpy-array-sinks">NumPy Array Sinks</a></li>
+<li><a class="reference internal" href="#high-performance-chunking">High Performance Chunking</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="connecting_stages.html"
+                        title="previous chapter">Connecting Stages To DAGs</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plotting.html"
+                        title="next chapter">Plotting</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/numpy_chunks.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plotting.html" title="Plotting"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="connecting_stages.html" title="Connecting Stages To DAGs"
+             >previous</a> |</li>
+        <li><a href="index.html">DAGPype 0.1.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ami Tavory.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

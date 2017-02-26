@@ -1,0 +1,83 @@
+==================
+Perl-Like Examples
+==================
+
+This page contains common examples of common perl_-like operations (taken from `Perl One-Liners Explained`_) not covered
+in :doc:`sed`.
+
+.. _`perl`: http://www.perl.org/
+.. _`Perl One-Liners Explained`: http://www.catonmat.net/series/perl-one-liners-explained
+
+.. figure:: perl-one-liners.jpg 
+  :alt: perl
+  
+  
+  
+------------
+Calculations  
+------------
+
+22. Print the sum of all the fields on a line.
+    ::
+        
+        >>> stream_vals('foo.csv', delimit = '\t') | filt(lambda tup: sum(tup)) | to_stream(sys.stdout)
+
+23. Print the sum of all the fields on all lines.
+    ::
+    
+        >>> print stream_vals('foo.csv', delimit = '\t') | filt(lambda tup: sum(tup)) | sum_()    
+
+25. Find the minimum element on a line.
+    ::
+        
+        >>> stream_vals('foo.csv', delimit = '\t') | filt(lambda tup: min(tup)) | to_stream(sys.stdout)
+
+26. Find the minimum element over all the lines.
+    ::
+    
+        >>> print stream_vals('foo.csv', delimit = '\t') | filt(lambda tup: min(tup)) | min_()    
+
+27. Find the maximum element on a line.
+    ::
+        
+        >>> stream_vals('foo.csv', delimit = '\t') | filt(lambda tup: max(tup)) | to_stream(sys.stdout)
+
+28. Find the maximum element over all the lines.
+    ::
+    
+        >>> print stream_vals('foo.csv', delimit = '\t') | filt(lambda tup: max(tup)) | max_()    
+
+29. Replace each field with its absolute value.
+    ::
+        
+        >>> stream_vals('foo.csv', delimit = '\t') | filt(lambda tup: tuple(abs(e) for e in tup)) | to_stream(sys.stdout)
+
+30. Find the total number of fields (words) on each line.
+    ::
+        
+        >>> stream_vals('foo.csv', delimit = '\t') | filt(lambda tup: len(tup)) | to_stream(sys.stdout)
+
+31. Print the total number of fields (words) on each line followed by the line.
+    ::
+        
+        >>> stream_lines('foo.csv') | \
+            (csv_split(delimit = '\t') | filt(lambda l: len(l))) + relay() | \
+            filt(lambda (len, l): str(len) + '\t' + l) | to_stream(sys.stdout)
+
+32. Find the total number of fields (words) on all lines.
+    ::
+        
+        >>> print stream_vals('foo.csv', delimit = '\t') | filt(lambda tup: len(tup)) | sum_()
+
+33. Print the total number of fields that match a pattern.
+    ::
+        
+        >>> pattern = re.compile(r'foo(.*?)bar')
+        >>> print stream_vals('foo.csv', delimit = '\t') | \
+            filt(pre = lambda tup: sum((1 if pattern.match(e) else 0 for e in tup) > 0)) | sum_()
+
+34. Print the total number of lines that match a pattern.
+
+        >>> print stream_vals('foo.csv', delimit = '\t') | grep(re.compile(r'foo(.*?)bar') | sum_()
+
+

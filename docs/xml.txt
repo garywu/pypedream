@@ -1,0 +1,63 @@
+===
+XML
+===
+
+XML sources (and sinks) can be used with pipelines. While XML processing is too general for providing useful general-purpose filters and sinks (ad-hoc stages need to be written), the library provides, though, a `xml.etree.ElementTree`_-based source stage. This page shows this stage, as well as an example of an ad-hoc filter stage.
+
+.. _`xml.etree.ElementTree`: http://docs.python.org/library/xml.etree.elementtree.html
+
+------------------------------
+The ``parse_xml`` Source Stage
+------------------------------
+
+The source stage :py:func:`dagpype.parse_xml` parses XML files, and emits a stream of 
+`xml.etree.ElementTree`_  elements with the events causing their emission:
+::
+
+    def parse_xml(stream, events = ('end',)):
+        """
+        Parses XML. Yields a sequence of (event, elem) pairs, where event
+            is the event for yielding the element (e.g., 'end' for tag end),
+            and elem is a xml.etree.ElementTree element whose tag and text can be
+            obtained through elem.tag and elem.text, respectively.
+    
+        Arguments:
+        stream -- Either a stream, e.g., as returned by open(), or a name of a file.    
+    
+        Keyword Arguments:
+        events -- Tuple of xml.etree.ElementTree events (default ('end',))
+        """
+
+Filters can be used to process this stream. 
+
+
+-------
+Example
+-------
+
+Consider the :download:`meteo.xml` XML file.
+
+Using :py:func:`dagpype.parse_xml` and :py:func:`dagpype.to_list`, here's a list of all the events and elements: 
+::
+
+    >>> parse_xml('meteo.xml') | to_list()
+    [('end', <Element 'day' at 0x20b3ea0>), ('end', <Element 'wind' at 0x20b3f30>), 
+    ('end', <Element 'hail' at 0x20b3f90>), ('end', <Element 'rain' at 0x20c9030>), 
+    ('end', <Element 'day' at 0x20c9060>), ('end', <Element 'wind' at 0x20c9090>), 
+    ('end', <Element 'hail' at 0x20c90c0>), ('end', <Element 'rain' at 0x20c90f0>), 
+    ('end', <Element 'day' at 0x20c9120>), ('end', <Element 'wind' at 0x20c9150>), 
+    ('end', <Element 'hail' at 0x20c9180>), ('end', <Element 'rain' at 0x20c91b0>), 
+    ('end', <Element 'day' at 0x20c91e0>), ('end', <Element 'wind' at 0x20c9210>), 
+    ('end', <Element 'hail' at 0x20c9240>), ('end', <Element 'rain' at 0x20c9270>), 
+    ('end', <Element 'day' at 0x20c92a0>), ('end', <Element 'wind' at 0x20c92d0>), 
+    ('end', <Element 'hail' at 0x20c9300>), ('end', <Element 'rain' at 0x20c9330>), 
+    ('end', <Element 'stuff' at 0x20b3ed0>)]
+
+To find the average 'rain' values, for example, we can do the following:
+::
+
+    >>> parse_xml('meteo.xml') | \
+    ...     filter(lambda event, elem : float(elem.text), pre = lambda event, elem: elem.tag == 'rain') | \
+    ...     ave()
+
+

@@ -1,0 +1,4 @@
+day,wind,hail,rain
+1.#IND,2,3,-inf
+1,4,-1.#INF,6
+2,7,29,nan

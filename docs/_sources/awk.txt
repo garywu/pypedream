@@ -1,0 +1,88 @@
+=================
+Awk-Like Examples
+=================
+
+This page contains common examples of common awk_-like operations (taken from `Awk One-Liners Explained`_) not covered
+in :doc:`sed` and :doc:`perl`.
+
+.. _awk: www.gnu.org/s/gawk/
+.. _`Awk One-Liners Explained`: http://www.catonmat.net/series/awk-one-liners-explained
+
+.. figure:: awk-programming-one-liners-explained.jpg
+  :alt: awk
+
+  
+--------------------------
+Numbering and Calculations
+--------------------------  
+  
+15. Find the line containing the largest (numeric) first field.  
+    ::
+    
+        >>> print stream_vals('foo.csv', cols = 0) | enumerate()_ | filt(lambda (i, v): (v, i)) | (min_() | select_inds(1))
+
+    .. Note::    
+        
+        The first two stages,
+        ::
+        
+            >>> stream_vals('foo.csv', cols = 0) | enumerate()_
+            
+        enumerates the first fields of the lines.
+        
+        The next stage,
+        ::
+        
+            filt(lambda (i, v): (v, i))
+            
+        reverses the tuples. Using Python's lexicographic ordering, 
+        ::
+        
+            min_() 
+            
+        extracts the tuple with the smallest value. The enumeration is retrieved using 
+        ::
+        
+            select_inds(1)
+            
+        (note the use of :ref:`sink chaining <sink_chaining>`).
+
+17. Print the last field of each line.
+    ::
+    
+        >>> print stream_vals('foo.csv') | select_inds(-1) | to_stream(sys.stdout)
+
+18. Print the last field of the last line.
+    ::
+    
+        >>> print stream_vals('foo.csv') | select_inds(-1) | nth(-1)
+
+
+--------------------------------
+Text Conversion and Substitution
+--------------------------------
+
+38. Print the first two fields in reverse order on each line.
+    ::
+    
+        >>> print stream_vals('foo.csv') | select_inds((1, 0)) | to_stream(sys.stdout)
+
+39. Swap first field with second on every line.
+    ::
+    
+        >>> print stream_vals('foo.csv') | \
+        ...     filt(lambda l: '%s,%s,%s' % (l[1], l[0], ','.join(l[2: ]))) | \
+        ...     to_stream(sys.stdout)
+
+40. Delete the second field on each line.
+        >>> print stream_vals('foo.csv') | \
+        ...     filt(lambda l: '%s,%s' % (l[0], ','.join(l[2: ]))) | \
+        ...     to_stream(sys.stdout)
+
+41. Print the fields in reverse order on every line.
+        >>> print stream_vals('foo.csv') | filt(lambda l: lle(reversed(l))) | to_stream(sys.stdout)
+
+
+
+
+

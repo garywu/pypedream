@@ -1,0 +1,93 @@
+========
+Plotting
+========
+
+Plots can be performed as the results of pipelines by piping elements to stages corresponding to `matplotlib.pyplot`_ operations.
+
+.. _`matplotlib.pyplot`: http://matplotlib.org/index.html
+
+matplotlib.pyplot contains three types of relevant commands for pipelines:
+
+* Graph attribute manipulation functions (e.g., ``xlabel``, ``title``)
+* Plotting functions (e.g., ``plot``, ``scatter``, ``pie``)
+* Output manipulation functions (e.g., ``savefig``, ``show``). 
+
+The first type is modeled as :ref:`filter stages <filter>` that merely relay whatever is passed to them, and the other two types are
+modeled as :ref:`sink stages <sink>`. The stages are in the :py:mod:`dagpype.plot`, and correspond to pyplot functions: each has the same name as a pyplot command, and takes the same arguments.
+
+
+------------------------------------------------------------------
+Connecting Stages Corresponding To Different pyplot Function Types
+------------------------------------------------------------------
+
+For example, to plot the exponential function between 0 and 3, we can do the following:
+::
+
+    a = numpy.arange(0, 3, 0.2)
+    source(numpy.exp(a)) | plot.plot()
+
+which uses a sink stage. This will create the plot:
+
+.. figure:: SimpleExpPlot.png
+  :alt: simple exp plot
+
+To add labels and a title, we can use filter stages:
+::
+
+    a = numpy.arange(0, 3, 0.2)
+    source(numpy.exp(a)) | plot.xlabel('x') | plot.ylabel('exp') | plot.title('Exponential functions') | plot.plot()
+
+This will create the plot:
+
+.. figure:: WithEmbelishExpPlot.png
+  :alt: with-embellish exp plot
+
+In order to manipulate the output, e.g., to save the graph to a file, we can use :ref:`sink chaining <sink_chaining>`, e.g.,
+::
+
+    source(numpy.exp(a)) | \
+      plot.xlabel('x') | plot.ylabel('exp') | plot.title('Exponential functions') | \
+      (plot.plot() | plot.savefig('foo.png'))
+
+
+--------------------------------------
+Stages' Similarity To pyplot Functions
+--------------------------------------
+
+As stated before, the stages closely resemble the corresponding pyplot functions. 
+
+The :py:func:`dagpype.plot.plot` stage, for example, can plot multiple lines simultaneously. For example, 
+::
+
+    a = numpy.arange(0, 3, 0.2)
+    source(a) + source(a) + source(a) + source(numpy.exp(a)) | plot.plot()
+
+will create the plot
+
+.. figure:: LinExpPlot.png
+  :alt: lin-exp plot
+
+When using pyplot, the ``figure()`` function might be needed in order to clear what has been plotted, and start a new figure. The library contains a corresponding stage (which takes the same arguments):
+::
+
+    a = numpy.arange(0, 3, 0.2)
+    source(a) | plot.figure() | plot.plot()
+
+or
+
+::
+
+    a = numpy.arange(0, 3, 0.2)
+    source(a) | plot.figure(8) | plot.plot()
+
+pyplot supports other types of plots as well. The following code
+::
+
+    source(numpy.random.randn(1000)) + source(numpy.random.randn(1000) + 5) | plot.hexbin()
+
+produces the plot:
+
+.. figure:: HexBin.png
+  :alt: hexbin plot
+
+

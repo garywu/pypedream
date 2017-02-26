@@ -1,0 +1,203 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Perl-Like Examples &mdash; DAGPype 0.1.5.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.5.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="DAGPype 0.1.5.0 documentation" href="index.html" />
+    <link rel="next" title="Awk-Like Examples" href="awk.html" />
+    <link rel="prev" title="Sed-Like Examples" href="sed.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="awk.html" title="Awk-Like Examples"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sed.html" title="Sed-Like Examples"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">DAGPype 0.1.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="perl-like-examples">
+<h1>Perl-Like Examples<a class="headerlink" href="#perl-like-examples" title="Permalink to this headline">¶</a></h1>
+<p>This page contains common examples of common <a class="reference external" href="http://www.perl.org/">perl</a>-like operations (taken from <a class="reference external" href="http://www.catonmat.net/series/perl-one-liners-explained">Perl One-Liners Explained</a>) not covered
+in <a class="reference internal" href="sed.html"><em>Sed-Like Examples</em></a>.</p>
+<div class="figure">
+<img alt="perl" src="_images/perl-one-liners.jpg" />
+</div>
+<div class="section" id="calculations">
+<h2>Calculations<a class="headerlink" href="#calculations" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic" start="22">
+<li><p class="first">Print the sum of all the fields on a line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">,</span> <span class="n">delimit</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">tup</span><span class="p">))</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Print the sum of all the fields on all lines.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">,</span> <span class="n">delimit</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="n">tup</span><span class="p">))</span> <span class="o">|</span> <span class="n">sum_</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<ol class="arabic" start="25">
+<li><p class="first">Find the minimum element on a line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">,</span> <span class="n">delimit</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">tup</span><span class="p">))</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Find the minimum element over all the lines.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">,</span> <span class="n">delimit</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">tup</span><span class="p">))</span> <span class="o">|</span> <span class="n">min_</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Find the maximum element on a line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">,</span> <span class="n">delimit</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">tup</span><span class="p">))</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Find the maximum element over all the lines.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">,</span> <span class="n">delimit</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">tup</span><span class="p">))</span> <span class="o">|</span> <span class="n">max_</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Replace each field with its absolute value.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">,</span> <span class="n">delimit</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">tup</span><span class="p">))</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Find the total number of fields (words) on each line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">,</span> <span class="n">delimit</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">tup</span><span class="p">))</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Print the total number of fields (words) on each line followed by the line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="go">    (csv_split(delimit = &#39;\t&#39;) | filt(lambda l: len(l))) + relay() | \</span>
+<span class="go">    filt(lambda (len, l): str(len) + &#39;\t&#39; + l) | to_stream(sys.stdout)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Find the total number of fields (words) on all lines.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">,</span> <span class="n">delimit</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">tup</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">tup</span><span class="p">))</span> <span class="o">|</span> <span class="n">sum_</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Print the total number of fields that match a pattern.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;foo(.*?)bar&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">,</span> <span class="n">delimit</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="go">    filt(pre = lambda tup: sum((1 if pattern.match(e) else 0 for e in tup) &gt; 0)) | sum_()</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Print the total number of lines that match a pattern.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;foo.csv&#39;</span><span class="p">,</span> <span class="n">delimit</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">grep</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;foo(.*?)bar&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">sum_</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Perl-Like Examples</a><ul>
+<li><a class="reference internal" href="#calculations">Calculations</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sed.html"
+                        title="previous chapter">Sed-Like Examples</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="awk.html"
+                        title="next chapter">Awk-Like Examples</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/perl.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="awk.html" title="Awk-Like Examples"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sed.html" title="Sed-Like Examples"
+             >previous</a> |</li>
+        <li><a href="index.html">DAGPype 0.1.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ami Tavory.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

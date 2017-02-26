@@ -1,0 +1,12 @@
+>>> from __future__ import print_function
+>>> from dagpype import *
+>>> import re
+>>> import numpy
+>>> import math
+
+.. automodule:: dagpype
+   :members:
+
+.. automodule:: dagpype.np
+   :members:
+

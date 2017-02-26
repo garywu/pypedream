@@ -1,0 +1,481 @@
+=================
+Sed-Like Examples
+=================
+
+This page contains common examples of common sed_-like operations (taken from `Sed One-Liners Explained`_).
+
+.. _sed: http://www.gnu.org/software/sed/
+.. _`Sed One-Liners Explained`: http://www.osnews.com/story/21004/Awk_and_Sed_One-Liners_Explained
+
+.. figure:: post-icon-sed.jpg
+  :alt: sed
+
+
+------------
+File spacing
+------------
+
+1. Double-space a file.
+    ::
+
+        >>> stream_lines('foo.txt') | filt(lambda l: l + '\n') | to_stream(sys.stdout)
+
+2. Double-space a file which already has blank lines in it. Do it so that the output contains no more than one blank line between two lines of text.
+    ::
+
+        >>> stream_lines('foo.txt') | filt(lambda l: l + '\n', pre = lambda l: l.strip()) | to_stream(sys.stdout)
+
+3. Triple-space a file.
+    ::
+    
+        >>> stream_lines('foo.txt') | filt(lambda l: l + '\n\n') | to_stream(sys.stdout)
+
+
+.. _`Item 4`:
+
+4. Undo double-spacing. This assumes that even-numbered lines are always blank.
+    ::
+
+        >>> stream_lines('foo.txt') | enumerate_() | \
+        ...     consec_group(lambda (n, _): int(n / 2), lambda d: select_inds(1) | nth(0))  | \
+        ...     to_stream(sys.stdout)
+        
+    .. Note::    
+        
+        The first line,        
+        ::
+        
+            >>> stream_lines('foo.txt') | enumerate_() | \
+            
+        transforms the lines of the files to tuples, whose first item is a running index. 
+        
+        The second line, 
+        ::
+        
+            ...     consec_group(lambda (n, _): int(n / 2), lambda d: select_inds(1) | nth(0))  | \
+            
+        uses the :func:`dagpype.consec_group` filter. The key determining consecutive group is the integer part of the running index divided by 2 (hence each two consecutive lines are in a group); the pipe for a consecutive group selects the first index, then pipes the result to a terminal stage taking only the first element piped.
+        
+5. Insert a blank line above every line that matches "regex".
+    ::
+
+        >>> stream_lines('foo.txt') | \
+        ...     filt(lambda l: '\nregex' if l == 'regex' else l) | to_stream(sys.stdout)
+
+6. Insert a blank line below every line that matches "regex".
+    ::
+
+        >>> stream_lines('foo.txt') | filt(lambda l: 'regex\n' if l == 'regex' else l) | to_stream(sys.stdout)
+
+7. Insert a blank line above and below every line that matches "regex".
+    ::
+
+        >>> stream_lines('foo.txt') | filt(lambda l: '\nregex\n' if l == 'regex' else l) | to_stream(sys.stdout)
+
+
+---------
+Numbering
+---------
+
+8. Number each line of a file (named filename). Left align the number.
+    ::
+
+        >>> stream_lines('foo.txt') | enumerate_() | \
+        ...     filt(lambda (n, l): '{:<5} {}'.format(n, l)) | \
+        ...     to_stream(sys.stdout)
+
+9. Number each line of a file (named filename). Right align the number.
+    ::
+
+        >>> stream_lines('foo.txt') | enumerate_() | \
+        ...     filt(lambda (n, l): '{:>5} {}'.format(n, l)) | \
+        ...     to_stream(sys.stdout)
+
+10. Number each non-empty line of a file.
+    ::
+
+        >>> source((int(l.strip() != ''), l.strip()) for l in open('foo.txt')) | \
+        ...     (select_inds(0) | cum_sum()) + select_inds(1) | \
+        ...     filt(lambda (n, l): '{} {}'.format(n, l) if l else '') | \
+        ...     to_stream('tmp.txt')
+        
+11. Count the number of lines in a file.
+    ::
+
+        >>> print stream_lines('foo.txt') | count()
+
+
+--------------------------------
+Text Conversion and Substitution
+--------------------------------
+
+22. Delete leading whitespace (tabs and spaces) from each line.
+    ::
+        
+        >>> stream_lines('foo.txt') | filt(lambda l: l.lstrip()) | to_stream(sys.stdout)
+
+23. Delete trailing whitespace (tabs and spaces) from each line.
+    ::
+        
+        >>> stream_lines('foo.txt') | filt(lambda l: l.rstrip()) | to_stream(sys.stdout)
+
+24. Delete both leading and trailing whitespace from each line.
+    ::
+        
+        >>> stream_lines('foo.txt') | filt(lambda l: l.strip()) | to_stream(sys.stdout)
+
+25. Insert five blank spaces at the beginning of each line.
+    ::
+        
+        >>> stream_lines('foo.txt') | filt(lambda l: 5 * ' ' + l) | to_stream(sys.stdout)
+
+26. Align lines right on a 79-column width.
+    ::
+
+        >>> stream_lines('foo.txt') | filt(lambda l: '{:>79}'.format(l)) | to_stream(sys.stdout)
+
+27. Align lines right on a 79-column width.
+    ::
+
+        >>> stream_lines('foo.txt') | filt(lambda l: '{:^79}'.format(l)) | to_stream(sys.stdout)
+
+28. Substitute (find and replace) the fist occurrence of "foo" with "bar" on each line.
+    ::
+    
+        >>> stream_lines('foo.txt') | filt(lambda l: l.replace('foo', 'bar', 1)) | to_stream(sys.stdout)
+
+29. Substitute (find and replace) the fourth occurrence of "foo" with "bar" on each line.
+    ::
+    
+        >>> stream_lines('foo.txt') | 
+        ...     filt(lambda l: 'foo'.join(l.split('foo', 4)[: 4]) + 'bar' + ''.join(l.split('foo', 4)[4: ]) \
+        ...         if len(l.split('foo')) > 3 else l) | \
+        ...     to_stream(sys.stdout)
+
+30. Substitute (find and replace) all occurrence of "foo" with "bar" on each line.
+    ::
+    
+        >>> stream_lines('foo.txt') | 
+        ...     filt(lambda l: l.replace('foo', 'bar')) | \
+        ...     to_stream(sys.stdout)
+
+31. Substitute (find and replace) the first occurrence of a repeated occurrence of "foo" with "bar".
+    ::
+
+        >>> stream_lines('foo.txt') | 
+        ...     filt(lambda l: l.replace('foo', 'bar', 1)) | \
+        ...     to_stream(sys.stdout)
+        
+32. Substitute (find and replace) only the last occurrence of "foo" with "bar".
+    ::
+
+        >>> stream_lines('foo.txt') | 
+        ...     filt(lambda l: 'bar'.join(l.rsplit('foo', 1))) | \
+        ...     to_stream(sys.stdout)
+
+33. Substitute all occurrences of "foo" with "bar" on all lines that contain "baz".
+    ::
+
+        >>> stream_lines('foo.txt') | 
+        ...     filt(lambda l: l.replace('foo', 'bar') if 'baz' in l else l) | \
+        ...     to_stream(sys.stdout)
+
+34. Substitute all occurrences of "foo" with "bar" on all lines that DO NOT contain "baz".
+    ::
+
+        >>> stream_lines('foo.txt') | 
+        ...     filt(lambda l: l.replace('foo', 'bar') if 'baz' not in l else l) | \
+        ...     to_stream(sys.stdout)
+
+35. Change text "scarlet", "ruby" or "puce" to "red".
+    ::
+
+        >>> stream_lines('foo.txt') | 
+        ...     filt(lambda l: l.replace('scarlet', 'red').replace('ruby', 'red').replace('puce', 'red')) | \
+        ...     to_stream(sys.stdout)
+
+38. Join pairs of lines side-by-side (emulates "paste" Unix command).
+    ::
+    
+        >>> stream_lines('foo.txt') | enumerate_() | \
+        ...     consec_group(
+        ...         lambda (n, _): int(n / 2), 
+        ...         lambda d: select_inds(1) | (to_list() | sink(lambda l: '\t'.join(l))))  | \
+        ...     to_stream(sys.stdout)
+        
+    .. Note::
+        
+        see `Item 4`_ for an explanation of the :func:`dagpype.consec_group` filter use here.        
+
+.. _`Item 39`:
+
+39. Append a line to the next if it ends with a backslash "\".
+    ::
+
+        >>> c = [0]
+        >>> stream_lines('foo.txt') | \
+        ...     consec_group(
+        ...         lambda l: (c[0], c.__setitem__(0, c[0] + int(len(l) == 0 or l[-1] != '\\'))), 
+        ...         lambda d: filt(lambda l: l[: -1] if len(l) > 0 and l[-1] == '\\' else l) | sum_())  | \
+        ...     to_stream(sys.stdout)
+
+    .. Note::
+    
+        The first line,
+        ::
+        
+            >>> c = [0]
+
+        initializes ``c`` to a list with a single element (0).
+
+        lines 3-5,
+        ::    
+        
+            ...     consec_group(
+            ...         lambda l: (c[0], c.__setitem__(0, c[0] + int(len(l) == 0 or l[-1] != '\\'))), 
+            ...         lambda d: filt(lambda l: l[: -1] if len(l) > 0 and l[-1] == '\\' else l) | sum_())  | \
+
+        group paragraphs together using the :func:`dagpype.consec_group` filter. The key determining consecutive group is a counter incremented after each line not ending in ``\`` (see `Stupid lambda tricks`_); the pipe for a consecutive group strips the ``\`` character, and joins the lines.        
+
+        .. _`Stupid lambda tricks`: http://www.p-nand-q.com/python/stupid_lambda_tricks.html
+
+40. Append a line to the previous if it starts with an equal sign "=".
+    ::
+
+        >>> c = [0]
+        >>> stream_lines('foo.txt') | \
+        ...     consec_group(
+        ...         lambda l: (c[0], c.__setitem__(0, c[0] + int(len(l) == 0 or l[0] != '='))), 
+        ...         lambda d: filt(lambda l: l[1 :] if len(l) > 0 and l[0] == '=' else l) | sum_())  | \
+        ...     to_stream(sys.stdout)
+
+    .. Note::
+        
+        see `Item 39`_ for an explanation.        
+
+43. Add a blank line after every five lines.
+    ::
+
+        >>> stream_lines('foo.txt') | enumerate_(1) | \
+        ...     filt(lambda (n, l): l if n % 5 else (l + '\n')) | to_stream(sys.stdout)
+
+    .. Note::    
+
+
+        The first line,        
+        ::
+            >>> stream_lines('foo.txt') | enumerate_(1) | \
+            
+        transforms the lines of the files to tuples, whose first item is a running index starting from 1. 
+
+-----------------------------------
+Selective Printing of Certain Lines
+-----------------------------------
+
+44. Print the first 10 lines of a file.
+    ::
+
+        >>> print slice_(open('foo.txt'), 10) | to_list()
+
+45. Print the first line of a file.
+    ::
+
+        >>> print stream_lines('foo.txt') | nth(0)
+        
+46. Print the last 10 lines of a file.
+    ::
+    
+        >>> print stream_lines('foo.txt') | tail(10) | to_list()        
+
+47. Print the last 2 lines of a file.
+    ::
+    
+        >>> print stream_lines('foo.txt') | tail(2) | to_list()        
+
+48. Print the last line of a file.
+    ::
+
+        >>> print stream_lines('foo.txt') | nth(-1)
+
+49. Print next-to-the-last line of a file.
+    ::
+
+        >>> print stream_lines('foo.txt') | nth(-2)
+        
+50. Print only the lines that match a regular expression (emulates "grep").
+    ::
+      
+        >>> stream_lines('foo.txt') | grep(re.compile(r'foo(.+?)bar')) | to_stream(sys.stdout)
+        
+51. Print only the lines that do not match a regular expression.
+    ::
+    
+    >>> r = re.compile(r'foo(.+?)bar')
+    >>> stream_lines('foo.txt') | filt(pre = lambda l: r.match(l) is None) | to_stream(sys.stdout)        
+        
+52. Print the line immediately before regexp, but not the line containing the regexp.
+    ::
+    
+        >>> r = re.compile(r'foo(.+?)bar')
+        >>> stream_lines('foo.txt') | to(lambda l: r.match(l)) | (nth(-2) | to_stream(sys.stdout))
+        
+53. Print the line immediately after regexp, but not the line containing the regexp.        
+    ::
+    
+        >>> r = re.compile(r'foo(.+?)bar')
+        >>> stream_lines('foo.txt') | from_(lambda l: r.match(l)) | (nth(1) | to_stream(sys.stdout))
+        
+54. Print one line before and after regexp. Also print the line matching regexp and its line number. (emulates "grep -A1 -B1").
+    ::
+    
+        >>> r = re.compile(r'foo(.+?)bar')
+        >>> stream_lines('foo.txt') | \
+        ...     (to(lambda l: r.match(l)) | (nth(-2))) + \
+        ...     (from_(lambda l: r.match(l)) | (nth(1))) + \
+        ...     (enumerate_() | filt(pre = lambda (n, l): r.match(l)) | nth(0))
+
+55. Grep for "AAA" and "BBB" and "CCC" in any order.
+    ::
+    
+        >>> stream_lines('foo.txt') | \
+        ...     filt(pre = lambda l: 'AAA' in l and 'BBB' in l and 'CCC' in l) | to_stream(sys.stdout)
+        
+56. Grep for "AAA" and "BBB" and "CCC" in that order.
+    ::
+    
+        >>> stream_lines('foo.txt') | \
+        ...     grep(re.compile(r'(.*)AAA(.*)BBB(.*)CCC(.*)')) | to_stream(sys.stdout)
+        
+57. Grep for "AAA" or "BBB", or "CCC".
+    ::
+    
+        >>> stream_lines('foo.txt') | \
+        ...     filt(pre = lambda l: 'AAA' in l or 'BBB' in l or 'CCC' in l) | to_stream(sys.stdout)
+        
+.. _`Item 58`:
+
+58. Print a paragraph that contains "AAA". (Paragraphs are separated by blank lines).
+    ::
+    
+        >>> stream_lines('foo.txt') | \
+        ...     consec_group(lambda l: l.strip() == '', lambda is_para: to_list()) | \
+        ...     filt(lambda ls: '\n'.join(ls) + '\n', pre = lambda ls: sum(['AAA' in l for l in ls]) > 0) | \
+        ...     to_stream(sys.stdout)
+
+    .. Note::    
+        
+        The second line, 
+        ::    
+        
+            ...     consec_group(lambda l: l.strip() == '', lambda is_para: to_list()) | \
+            
+        groups paragraphs together using the :func:`dagpype.consec_group` filter. The key determining consecutive group is whether a line is empty (hence all lines in a paragraph will get ``True`` key, whereas separating lines will get a ``False`` key); the pipe for a consecutive group places the lines in a list.
+        
+        The third line,
+        ::
+        
+            ...     filt(lambda ls: '\n'.join(ls) + '\n', pre = lambda ls: sum(['AAA' in l for l in ls]) > 0) | \
+            
+        filters lists: the precondition is that 'AAA' appears somewhere in the list, and the transformation function joins the lines using a newline.
+        
+
+59. Print a paragraph if it contains "AAA" and "BBB" and "CCC" in any order.
+    ::
+    
+        >>> stream_lines('foo.txt') | \
+        ...     consec_group(lambda l: l.strip() == '', lambda is_para: to_list()) | \
+        ...     filt(
+        ...         lambda ls: '\n'.join(ls) + '\n', 
+        ...         pre = lambda ls: sum(['AAA' in l and 'BBB' in l and 'CCC' in l for l in ls]) > 0) | \
+        ...     to_stream(sys.stdout)
+
+    .. Note::
+        
+        see `Item 58`_ for an explanation.
+
+60. Print a paragraph if it contains "AAA" or "BBB" or "CCC".
+    ::
+    
+        >>> stream_lines('foo.txt') | \
+        ...     consec_group(lambda l: l.strip() == '', lambda is_para: to_list()) | \
+        ...     filt(
+        ...         lambda ls: '\n'.join(ls) + '\n', 
+        ...         pre = lambda ls: sum(['AAA' in l or 'BBB' in l or 'CCC' in l for l in ls]) > 0) | \
+        ...     to_stream(sys.stdout)
+
+    .. Note::
+        
+        see `Item 58`_ for an explanation.
+
+61. Print only the lines that are 65 characters in length or more.
+    ::
+    
+        >>> print stream_lines('foo.txt') | filt(pre = lambda l: len(l) >= 65) | to_list()        
+
+62. Print only the lines that are less than 65 chars.
+    ::
+    
+        >>> print stream_lines('foo.txt') | filt(pre = lambda l: len(l) < 65) | to_list()        
+
+66. Beginning at line 3, print every 7th line.
+    ::
+
+        >>> print stream_lines('foo.txt') | slice_(3, None, 7) | to_list()
+
+
+-----------------------------------
+Selective Deletion of Certain Lines
+-----------------------------------
+
+69. Delete duplicate, consecutive lines from a file.
+    ::
+
+        >>> stream_lines('foo.txt') | \
+        ...     consec_group(lambda l: l, lambda l: nth(0)) | to_stream(sys.stdout)
+
+70. Delete duplicate, nonconsecutive lines from a file.
+    ::
+
+        >>> stream_lines('foo.txt') | \
+        ...     group(lambda l: l, lambda l: nth(0)) | to_stream(sys.stdout)
+
+71. Delete all lines except duplicate consecutive lines (emulates "uniq -d").
+    ::
+
+72. Delete the first 10 lines of a file.
+    ::
+    
+        >>> stream_lines('foo.txt') | slice_(10, None) | to_stream(sys.stdout)
+        
+73. Delete the last line of a file.        
+    ::
+    
+        >>> stream_lines('foo.txt') | skip(-1) | to_stream(sys.stdout)
+
+74. Delete the last 2 lines of a file.        
+    ::
+    
+        >>> stream_lines('foo.txt') | skip(-2) | to_stream(sys.stdout)
+
+75. Delete the last 10 lines of a file.        
+    ::
+    
+        >>> stream_lines('foo.txt') | skip(-10) | to_stream(sys.stdout)
+
+76. Delete every 8th line.      
+    ::
+    
+        >>> stream_lines('foo.txt') | enumerate_(1) | \
+        ...     filt(pre: lambda (n, l): n % 8) | to_stream(sys.stdout)
+        
+77. Delete lines that match regular expression pattern.
+    ::
+
+        >>> r = re.compile(r'foo(.+?)bar')
+        >>> stream_lines('foo.txt') | filt(pre = lambda l: r.match(l) is None) | to_stream(sys.stdout)
+
+78. Delete all blank lines in a file (emulates "grep '.'").
+    ::
+    
+        >>> stream_lines('foo.txt') | filt(pre = lambda l: l.strip()) | to_stream(sys.stdout)
+

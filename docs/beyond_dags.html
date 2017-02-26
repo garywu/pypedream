@@ -1,0 +1,457 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Augmenting Pipelines &mdash; DAGPype 0.1.5.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.5.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="DAGPype 0.1.5.0 documentation" href="index.html" />
+    <link rel="next" title="Sed-Like Examples" href="sed.html" />
+    <link rel="prev" title="XML" href="xml.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sed.html" title="Sed-Like Examples"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="xml.html" title="XML"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">DAGPype 0.1.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="augmenting-pipelines">
+<h1>Augmenting Pipelines<a class="headerlink" href="#augmenting-pipelines" title="Permalink to this headline">¶</a></h1>
+<p>DAG Pipelines are more natural than Python&#8217;s regular control structures (e.g., loops and conditionals) in some cases, less so in other cases. Fortunately, they can be combined.</p>
+<p>E.g., the following shows using pipelines within regular Python list comprehension, specifically creating a list of means and standard deviations of the contents of the files in some directory</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stats</span> <span class="o">=</span> <span class="p">[</span><span class="n">stream_vals</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">|</span> <span class="n">mean</span><span class="p">()</span> <span class="o">+</span> <span class="n">stddev</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s">&#39;dir/*.txt&#39;</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>As a further example, the following shows using stages with regular Python conditionals, specifically,showing how a stage can be selected at runtime; if <tt class="docutils literal"><span class="pre">debug</span></tt> is used, a trace stage - tracing the elements piped through it - will be used, otherwise, a relay stage - passing elements passed through it - will be used:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">debug</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;wind.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">trace</span><span class="p">()</span> <span class="k">if</span> <span class="n">debug</span> <span class="k">else</span> <span class="n">relay</span><span class="p">())</span> <span class="o">|</span> <span class="n">sum_</span><span class="p">()</span>
+<span class="go">0 : 2.0</span>
+<span class="go">1 : 4.0</span>
+<span class="go">2 : 7.0</span>
+<span class="go">3 : 23.0</span>
+<span class="go">4 : 0.0</span>
+<span class="go">5 : 2.0</span>
+<span class="go">6 : 4.0</span>
+<span class="go">7 : 7.0</span>
+<span class="go">8 : 23.0</span>
+<span class="go">9 : 0.0</span>
+<span class="go">10 : 2.0</span>
+<span class="go">11 : 4.0</span>
+<span class="go">12 : 7.0</span>
+<span class="go">13 : 23.0</span>
+<span class="go">14 : 0.0</span>
+<span class="go">15 : 2.0</span>
+<span class="go">16 : 4.0</span>
+<span class="go">17 : 7.0</span>
+<span class="go">18 : 23.0</span>
+<span class="go">19 : 0.0</span>
+<span class="go">20 : 2.0</span>
+<span class="go">21 : 4.0</span>
+<span class="go">22 : 7.0</span>
+<span class="go">23 : 23.0</span>
+<span class="go">24 : 0.0</span>
+<span class="go">25 : 2.0</span>
+<span class="go">26 : 4.0</span>
+<span class="go">27 : 7.0</span>
+<span class="go">28 : 23.0</span>
+<span class="go">29 : 0.0</span>
+<span class="go">30 : 2.0</span>
+<span class="go">31 : 4.0</span>
+<span class="go">32 : 7.0</span>
+<span class="go">33 : 23.0</span>
+<span class="go">34 : 0.0</span>
+<span class="go">35 : 2.0</span>
+<span class="go">36 : 4.0</span>
+<span class="go">37 : 7.0</span>
+<span class="go">38 : 23.0</span>
+<span class="go">39 : 0.0</span>
+<span class="go">40 : 2.0</span>
+<span class="go">41 : 4.0</span>
+<span class="go">42 : 7.0</span>
+<span class="go">43 : 23.0</span>
+<span class="go">44 : 0.0</span>
+<span class="go">45 : 2.0</span>
+<span class="go">46 : 4.0</span>
+<span class="go">47 : 7.0</span>
+<span class="go">48 : 23.0</span>
+<span class="go">49 : 0.0</span>
+<span class="go">50 : 2.0</span>
+<span class="go">51 : 4.0</span>
+<span class="go">52 : 7.0</span>
+<span class="go">53 : 23.0</span>
+<span class="go">54 : 0.0</span>
+<span class="go">55 : 2.0</span>
+<span class="go">56 : 4.0</span>
+<span class="go">57 : 7.0</span>
+<span class="go">58 : 23.0</span>
+<span class="go">59 : 0.0</span>
+<span class="go">432.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">debug</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stream_vals</span><span class="p">(</span><span class="s">&#39;wind.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">trace</span><span class="p">()</span> <span class="k">if</span> <span class="n">debug</span> <span class="k">else</span> <span class="n">relay</span><span class="p">())</span> <span class="o">|</span> <span class="n">sum_</span><span class="p">()</span>
+<span class="go">432.0</span>
+</pre></div>
+</div>
+<p>Finally, the following shows functions returning sub-pipes, specifically a function taking a file name, and returning an exponential average of the absolute values of its values:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">abs_exp_ave</span><span class="p">(</span><span class="n">f_name</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">stream_vals</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span> <span class="o">|</span> <span class="n">abs_</span><span class="p">()</span> <span class="o">|</span> <span class="n">exp_ave</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">abs_exp_ave</span><span class="p">(</span><span class="s">&#39;foo.dat&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">abs_exp_ave</span><span class="p">(</span><span class="s">&#39;bar.dat&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">corr</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Unfortunately, there are still cases which require further augmentation. <a class="reference internal" href="#cases">Cases</a> describes common cases where augmenting pipelines is necessary,`Dynamic Subpipes`_ shows a mechanism where stages assimilate these control structures inside them, and <a class="reference internal" href="#frozen-and-thawed-targets">Frozen and Thawed Targets</a> shows the complementary mechanism, whereby standard control structures can use pipelines. The first approach is useful for very common cases, where the cost of writing new stages is offset by the ease of constructing pipelines using them once they are written.</p>
+<div class="section" id="cases">
+<h2>Cases<a class="headerlink" href="#cases" title="Permalink to this headline">¶</a></h2>
+<p>Scientific data preparation and processing often involves <a class="reference external" href="http://en.wikipedia.org/wiki/SQL">SQL</a>-like operations, even if the terminology is different. Here are three very common cases.</p>
+<div class="section" id="group">
+<h3>Group<a class="headerlink" href="#group" title="Permalink to this headline">¶</a></h3>
+<p>Consider for example the CSV file <a class="reference download internal" href="_downloads/meteo.csv"><tt class="xref download docutils literal"><span class="pre">meteo.csv</span></tt></a>, in particular the &#8216;day&#8217; and &#8216;wind&#8217; columns. Each row contains a day and a wind measurement. Some consecutive rows give wind measurements for the same day, and we very often need to aggregate these similar entries.</p>
+<p>Unfortunately, there is no single aggregation strategy that is always appropriate. We might aggregate all wind measurements of some day by a list of all their values, their average and standard deviation, median, sum, any combination of the preceding, and so on. We might do the preceding for all values which are not considered outliers, for example. In general, we might construct a pipeline for each set of similar elements. No stage can be written to do this (at least not efficiently).</p>
+<p>This <em>group</em> case, where consecutive similar elements are aggregated, is not the only case where static pipelines need augmentation. The complementary operation, <a href="#id6"><span class="problematic" id="id7">chain_</span></a>, as well as <a class="reference external" href="http://en.wikipedia.org/wiki/Join_%28SQL%29">join</a>, are examples of this as well.</p>
+</div>
+<div class="section" id="chain">
+<h3>Chain<a class="headerlink" href="#chain" title="Permalink to this headline">¶</a></h3>
+<p>The group case aggregates consecutive similar elements. The <em>chain</em> case is complementary, in that it expands aggregates to similar consecutive elements.</p>
+<p>Suppose, for example, we have a directory containing files whose names are of the form &#8216;data?.csv&#8217;. We wish to find the total average of all values in these files.</p>
+<p>Using static pipelines, it is easy to build a source that iterates over all such filenames:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">os_walk</span><span class="p">()</span> <span class="o">|</span> <span class="n">filename_filt</span><span class="p">(</span><span class="s">&#39;data?.csv&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Using static pipelines, it is also easy to find the average of the contents of a specific file:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">stream_vals</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span> <span class="o">|</span> <span class="n">ave</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>However, using static pipelines, it is not possible to connect the two. It is not possible to convey to the second pipeline that the output of the first pipeline is an aggregate (in this case, filenames) that should be expanded (in this case, to their content).</p>
+</div>
+<div class="section" id="id1">
+<h3>Join<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://en.wikipedia.org/wiki/Join_%28SQL%29">Join</a>, and in particular equi-join, are very common operations. In this case, we have two sequences, and wish to output for each elements of the first sequence something that depends on the elements similar to it in the second sequence.  This very general operation too cannot be captured by static pipelines.</p>
+<p>E.g., consider the files <a class="reference download internal" href="_downloads/employee.csv"><tt class="xref download docutils literal"><span class="pre">employee.csv</span></tt></a> and <a class="reference download internal" href="_downloads/dept.csv"><tt class="xref download docutils literal"><span class="pre">dept.csv</span></tt></a>, which, respectively contain the following data, respectively:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="22%" />
+<col width="34%" />
+<col width="44%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Name</th>
+<th class="head">EmpID</th>
+<th class="head">DeptName</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Harry</td>
+<td>3415</td>
+<td>Finance</td>
+</tr>
+<tr class="row-odd"><td>Sally</td>
+<td>2241</td>
+<td>Sales</td>
+</tr>
+<tr class="row-even"><td>George</td>
+<td>3401</td>
+<td>Finance</td>
+</tr>
+<tr class="row-odd"><td>Harriet</td>
+<td>2202</td>
+<td>Sales</td>
+</tr>
+<tr class="row-even"><td>Nelson</td>
+<td>2455</td>
+<td>Entertainment</td>
+</tr>
+</tbody>
+</table>
+<p>and</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="40%" />
+<col width="60%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">DeptName</th>
+<th class="head">Manager</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Finance</td>
+<td>George</td>
+</tr>
+<tr class="row-odd"><td>Sales</td>
+<td>Harriet</td>
+</tr>
+<tr class="row-even"><td>Production</td>
+<td>Charles</td>
+</tr>
+</tbody>
+</table>
+<p>We might want to map each employee to his / her manager, or map each manager to the number of employees managed.</p>
+</div>
+</div>
+<div class="section" id="dynamic-subpipes">
+<h2>Dynamic Subpipes<a class="headerlink" href="#dynamic-subpipes" title="Permalink to this headline">¶</a></h2>
+<p>In this approach, stages internally create sub-pipes on the fly. This section shows stages for the group, chain, and join cases above, as well as how to write such stages.</p>
+<div class="section" id="id3">
+<h3>Group<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="reference.html#dagpype.group" title="dagpype.group"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.group()</span></tt></a> stage takes two functions: the first maps each element to a key used for deciding which elements are similar, and the second is used for dynamically constructing a sub-pipe for similar elements.</p>
+<div class="highlight-python"><pre>def group(key, key_pipe):
+"""
+Groups consecutive similar elements by sending all such elements
+    through an ad-hoc create pipe.
+
+Arguments:
+    key -- Function mapping each element to a key. This key will
+        be used to decide which elements are similar.
+    key_pipe -- Function mapping each key to a pipe.</pre>
+</div>
+<p>For aggregating the same-day wind measurements of <a class="reference download internal" href="_downloads/meteo.csv"><tt class="xref download docutils literal"><span class="pre">meteo.csv</span></tt></a>, we can do the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="go">&gt;&gt;&gt;&gt; csv_vals(&#39;meteo.csv&#39;, (&#39;day&#39;, &#39;wind&#39;)) | \</span>
+<span class="gp">... </span><span class="n">group</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">wind</span><span class="p">)</span> <span class="p">:</span> <span class="n">day</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">key_pipe</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">day</span> <span class="p">:</span> <span class="n">sink</span><span class="p">(</span><span class="n">day</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">select_inds</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">ave</span><span class="p">())</span> <span class="o">+</span> <span class="p">(</span><span class="n">select_inds</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">stddev</span><span class="p">()))</span> <span class="o">|</span> \
+<span class="gp">... </span><span class="n">to_csv</span><span class="p">(</span><span class="s">&#39;day_wind.csv&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;day&#39;</span><span class="p">,</span> <span class="s">&#39;ave&#39;</span><span class="p">,</span> <span class="s">&#39;stddev&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The line</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">wind</span><span class="p">)</span> <span class="p">:</span> <span class="n">day</span>
+</pre></div>
+</div>
+<p>indicates that elements are similar if they share the same day.
+The line</p>
+<div class="highlight-python"><pre>key_pipe = lambda day : sink(day) + (select_inds(1) | ave()) + (select_inds(1) | stddev()))</pre>
+</div>
+<p>indicates that we wish to pass all elements with the same day, to a fanned sink consisting of three parts: the day, the average of wind values, and their standard deviation. Note that the resulting triples can be streamed on in the regular manner; in this case, they are written to a CSV file.</p>
+<p>To form a list of the medians of wind measurements of same days, we can do this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="go">&gt;&gt;&gt;&gt; csv_vals(&#39;meteo.csv&#39;, (&#39;day&#39;, &#39;wind&#39;)) | \</span>
+<span class="gp">... </span>    <span class="n">group</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">key</span> <span class="o">=</span> <span class="k">lambda</span> <span class="p">(</span><span class="n">day</span><span class="p">,</span> <span class="n">wind</span><span class="p">)</span> <span class="p">:</span> <span class="n">day</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">key_pipe</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">day</span> <span class="p">:</span> <span class="n">select_inds</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_array</span><span class="p">()</span> <span class="o">|</span> <span class="n">sink</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span> <span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">a</span><span class="p">)))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h3>Chain<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="reference.html#dagpype.chain" title="dagpype.chain"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.chain()</span></tt></a> stage takes a function mapping each element to a pipe emanating all elements which this element aggregates.</p>
+<div class="highlight-python"><pre>def chain(key_pipe):
+    """
+    Chains the result of applying an ad-hoc created pipe to each element.
+
+    Arguments:
+        key_pipe - Function mapping each element to a pipe.</pre>
+</div>
+<p>To find the total average of all values in files of the form &#8216;data?.csv&#8217;, we can do this:F</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="go">&gt;&gt;&gt;&gt; os_walk() | filename_filt(&#39;data?.csv&#39;) | \</span>
+<span class="gp">... </span>    <span class="n">chain</span><span class="p">(</span><span class="k">lambda</span> <span class="n">f_name</span> <span class="p">:</span>  <span class="n">stream_vals</span><span class="p">(</span><span class="n">f_name</span><span class="p">))</span> \ <span class="o">|</span>
+<span class="gp">... </span>    <span class="n">ave</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id5">
+<h3>Join<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="reference.html#dagpype.dict_join" title="dagpype.dict_join"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.dict_join()</span></tt></a> stage takes a dictionary, two functions, and two optional pipelines:</p>
+<div class="highlight-python"><pre>def dict_join(
+        joined,
+        key,
+        common_pipe,
+        out_of_dict_pipe = None,
+        dict_only_pipe = None):
+    """
+    Performs an SQL-style join with a dictionary.
+
+    Arguments:
+        joined -- Dictionary of items with which to join.
+        key -- Function mapping each element to a key. This key will
+            be used to decide with which joined element (if any) to join.
+        common_pipe -- Function taking a key and a value from the joined dictionary, and
+            returning a pipe. This pipe will be used for all elements matching the key.
+
+    Keyword Arguments:
+        out_of_dict_pipe -- Pipe used for all elements not in the joined dictionary (default None).
+        dict_only_pipe -- Pipe used for all elements only in the dictionary (default None).</pre>
+</div>
+<p>For creating a dictionary mapping employees to managers, we can do the following (refer to the tables above):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="go">&gt;&gt;&gt;&gt; d = csv_vals(&#39;data/employee.csv&#39;, (&#39;Name&#39;, &#39;EmpId&#39;, &#39;DeptName&#39;), (str, int, str)) | \</span>
+<span class="gp">... </span>    <span class="n">dict_join</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">csv_vals</span><span class="p">(</span><span class="s">&#39;data/dept.csv&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;DeptName&#39;</span><span class="p">,</span> <span class="s">&#39;Manager&#39;</span><span class="p">),</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">))</span> <span class="o">|</span> <span class="n">to_dict</span><span class="p">(),</span>
+<span class="gp">... </span>        <span class="k">lambda</span> <span class="n">name_id_dept</span> <span class="p">:</span> <span class="n">name_id_dept</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+<span class="gp">... </span>        <span class="k">lambda</span> <span class="n">dept</span><span class="p">,</span> <span class="n">manager</span> <span class="p">:</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">name_id_dept</span> <span class="p">:</span> <span class="p">(</span><span class="n">name_id_dept</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">manager</span><span class="p">)),</span>
+<span class="gp">... </span>        <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">name_id_dept</span> <span class="p">:</span> <span class="p">(</span><span class="n">name_id_dept</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">None</span><span class="p">)),</span>
+<span class="gp">... </span>        <span class="bp">None</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_dict</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">d</span><span class="p">[</span><span class="s">&#39;Harriet&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;Harriet&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">d</span><span class="p">[</span><span class="s">&#39;Nelson&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span>
+</pre></div>
+</div>
+<p>For creating a dictionary mapping managers to the number of people they manage, we can do the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">csv_vals</span><span class="p">(</span><span class="s">&#39;data/employee.csv&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;Name&#39;</span><span class="p">,</span> <span class="s">&#39;EmpId&#39;</span><span class="p">,</span> <span class="s">&#39;DeptName&#39;</span><span class="p">),</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">dict_join</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="n">csv_vals</span><span class="p">(</span><span class="s">&#39;data/dept.csv&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;DeptName&#39;</span><span class="p">,</span> <span class="s">&#39;Manager&#39;</span><span class="p">),</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">))</span> <span class="o">|</span> <span class="n">to_dict</span><span class="p">(),</span>
+<span class="gp">... </span>        <span class="k">lambda</span> <span class="n">name_id_dept</span> <span class="p">:</span> <span class="n">name_id_dept</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+<span class="gp">... </span>        <span class="k">lambda</span> <span class="n">dept</span><span class="p">,</span> <span class="n">manager</span> <span class="p">:</span> <span class="n">sink</span><span class="p">(</span><span class="n">manager</span><span class="p">)</span> <span class="o">+</span> <span class="n">count</span><span class="p">(),</span>
+<span class="gp">... </span>        <span class="bp">None</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">dept_manager</span> <span class="p">:</span> <span class="p">(</span><span class="n">dept_manager</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">)))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_dict</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">d</span><span class="p">[</span><span class="s">&#39;Harriet&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">assert</span> <span class="n">d</span><span class="p">[</span><span class="s">&#39;Charles&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="frozen-and-thawed-targets">
+<h2>Frozen And Thawed Targets<a class="headerlink" href="#frozen-and-thawed-targets" title="Permalink to this headline">¶</a></h2>
+<p>In this approach, pipelines can be used within regular control structures.</p>
+<p>Using the <a class="reference internal" href="reference.html#dagpype.freeze" title="dagpype.freeze"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.freeze()</span></tt></a> function, any sink can be &#8220;frozen&#8221;. Connecting a pipeline to a regular sink
+causes immediate evaluation of the result. Conversely, connecting a pipeline to a frozen sink does not do so. Only &#8220;thawing&#8221; a sink, through the <a class="reference internal" href="reference.html#dagpype.thaw" title="dagpype.thaw"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.thaw()</span></tt></a> function, causes a result evaluation.</p>
+<p>For example, in order to calculate the average of all values in files of the form &#8216;data?.csv&#8217;, we can do this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">iglob</span>
+
+<span class="n">a</span> <span class="o">=</span> <span class="n">freeze</span><span class="p">(</span><span class="n">ave</span><span class="p">())</span>
+<span class="k">for</span> <span class="n">f_name</span> <span class="ow">in</span> <span class="n">iglob</span><span class="p">(</span><span class="s">&#39;data?.csv&#39;</span><span class="p">):</span>
+    <span class="n">stream_vals</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span> <span class="o">|</span> <span class="n">a</span>
+<span class="k">print</span> <span class="n">thaw</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The line</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">a</span> <span class="o">=</span> <span class="n">freeze</span><span class="p">(</span><span class="n">ave</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>forms a frozen version of the <cite>ave</cite> sink.
+The line</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">stream_vals</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span> <span class="o">|</span> <span class="n">a</span>
+</pre></div>
+</div>
+<p>does not evaluate into a float, it merely updates the frozen sink.
+Only the line</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">print</span> <span class="n">thaw</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>thaws the sink (and, in this case, prints the result).</p>
+<p>Similarly, in order to calculate the average and standard deviation of all values in files of the form &#8216;data?.csv&#8217; truncated to 10, we can do this:</p>
+<div class="highlight-python"><pre>from glob import iglob
+
+a = freeze(filt(lambda x : min(x, 10) | ave() + stddev())
+for f_name in iglob('data?.csv'):
+    stream_vals(f_name) | cast(float) | a
+print thaw(a)</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Augmenting Pipelines</a><ul>
+<li><a class="reference internal" href="#cases">Cases</a><ul>
+<li><a class="reference internal" href="#group">Group</a></li>
+<li><a class="reference internal" href="#chain">Chain</a></li>
+<li><a class="reference internal" href="#id1">Join</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#dynamic-subpipes">Dynamic Subpipes</a><ul>
+<li><a class="reference internal" href="#id3">Group</a></li>
+<li><a class="reference internal" href="#id4">Chain</a></li>
+<li><a class="reference internal" href="#id5">Join</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#frozen-and-thawed-targets">Frozen And Thawed Targets</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="xml.html"
+                        title="previous chapter">XML</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sed.html"
+                        title="next chapter">Sed-Like Examples</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/beyond_dags.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sed.html" title="Sed-Like Examples"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="xml.html" title="XML"
+             >previous</a> |</li>
+        <li><a href="index.html">DAGPype 0.1.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ami Tavory.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

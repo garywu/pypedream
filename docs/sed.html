@@ -1,0 +1,623 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Sed-Like Examples &mdash; DAGPype 0.1.5.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1.5.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="DAGPype 0.1.5.0 documentation" href="index.html" />
+    <link rel="next" title="Perl-Like Examples" href="perl.html" />
+    <link rel="prev" title="Augmenting Pipelines" href="beyond_dags.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="perl.html" title="Perl-Like Examples"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="beyond_dags.html" title="Augmenting Pipelines"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">DAGPype 0.1.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="sed-like-examples">
+<h1>Sed-Like Examples<a class="headerlink" href="#sed-like-examples" title="Permalink to this headline">¶</a></h1>
+<p>This page contains common examples of common <a class="reference external" href="http://www.gnu.org/software/sed/">sed</a>-like operations (taken from <a class="reference external" href="http://www.osnews.com/story/21004/Awk_and_Sed_One-Liners_Explained">Sed One-Liners Explained</a>).</p>
+<div class="figure">
+<img alt="sed" src="_images/post-icon-sed.jpg" />
+</div>
+<div class="section" id="file-spacing">
+<h2>File spacing<a class="headerlink" href="#file-spacing" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><dl class="first docutils">
+<dt>Double-space a file.</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Double-space a file which already has blank lines in it. Do it so that the output contains no more than one blank line between two lines of text.</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">pre</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Triple-space a file.</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n\n</span><span class="s">&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+</ol>
+<ol class="arabic" id="item-4" start="4">
+<li><dl class="first docutils">
+<dt>Undo double-spacing. This assumes that even-numbered lines are always blank.</dt>
+<dd><div class="first highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">enumerate_</span><span class="p">()</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">consec_group</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">select_inds</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">nth</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>  <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="last admonition note">
+<p class="first admonition-title">Note</p>
+<p>The first line,</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">enumerate_</span><span class="p">()</span> <span class="o">|</span> \
+</pre></div>
+</div>
+<p>transforms the lines of the files to tuples, whose first item is a running index.</p>
+<p>The second line,</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="o">...</span>     <span class="n">consec_group</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">select_inds</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">nth</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>  <span class="o">|</span> \
+</pre></div>
+</div>
+<p class="last">uses the <a class="reference internal" href="reference.html#dagpype.consec_group" title="dagpype.consec_group"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.consec_group()</span></tt></a> filter. The key determining consecutive group is the integer part of the running index divided by 2 (hence each two consecutive lines are in a group); the pipe for a consecutive group selects the first index, then pipes the result to a terminal stage taking only the first element piped.</p>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Insert a blank line above every line that matches &#8220;regex&#8221;.</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">regex&#39;</span> <span class="k">if</span> <span class="n">l</span> <span class="o">==</span> <span class="s">&#39;regex&#39;</span> <span class="k">else</span> <span class="n">l</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Insert a blank line below every line that matches &#8220;regex&#8221;.</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="s">&#39;regex</span><span class="se">\n</span><span class="s">&#39;</span> <span class="k">if</span> <span class="n">l</span> <span class="o">==</span> <span class="s">&#39;regex&#39;</span> <span class="k">else</span> <span class="n">l</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Insert a blank line above and below every line that matches &#8220;regex&#8221;.</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">regex</span><span class="se">\n</span><span class="s">&#39;</span> <span class="k">if</span> <span class="n">l</span> <span class="o">==</span> <span class="s">&#39;regex&#39;</span> <span class="k">else</span> <span class="n">l</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+</ol>
+</div>
+<div class="section" id="numbering">
+<h2>Numbering<a class="headerlink" href="#numbering" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic" start="8">
+<li><dl class="first docutils">
+<dt>Number each line of a file (named filename). Left align the number.</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">enumerate_</span><span class="p">()</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span> <span class="s">&#39;{:&lt;5} {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Number each line of a file (named filename). Right align the number.</dt>
+<dd><div class="first last highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">enumerate_</span><span class="p">()</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span> <span class="s">&#39;{:&gt;5} {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><p class="first">Number each non-empty line of a file.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">source</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">),</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="p">(</span><span class="n">select_inds</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="n">cum_sum</span><span class="p">())</span> <span class="o">+</span> <span class="n">select_inds</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span> <span class="s">&#39;{} {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span> <span class="k">if</span> <span class="n">l</span> <span class="k">else</span> <span class="s">&#39;&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="s">&#39;tmp.txt&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Count the number of lines in a file.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">count</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+<div class="section" id="text-conversion-and-substitution">
+<h2>Text Conversion and Substitution<a class="headerlink" href="#text-conversion-and-substitution" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic" start="22">
+<li><p class="first">Delete leading whitespace (tabs and spaces) from each line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">lstrip</span><span class="p">())</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Delete trailing whitespace (tabs and spaces) from each line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Delete both leading and trailing whitespace from each line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Insert five blank spaces at the beginning of each line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="mi">5</span> <span class="o">*</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="n">l</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Align lines right on a 79-column width.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="s">&#39;{:&gt;79}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">l</span><span class="p">))</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Align lines right on a 79-column width.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="s">&#39;{:^79}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">l</span><span class="p">))</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Substitute (find and replace) the fist occurrence of &#8220;foo&#8221; with &#8220;bar&#8221; on each line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Substitute (find and replace) the fourth occurrence of &#8220;foo&#8221; with &#8220;bar&#8221; on each line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span>
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="s">&#39;foo&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)[:</span> <span class="mi">4</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;bar&#39;</span> <span class="o">+</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)[</span><span class="mi">4</span><span class="p">:</span> <span class="p">])</span> \
+<span class="gp">... </span>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="k">else</span> <span class="n">l</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Substitute (find and replace) all occurrence of &#8220;foo&#8221; with &#8220;bar&#8221; on each line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span>
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Substitute (find and replace) the first occurrence of a repeated occurrence of &#8220;foo&#8221; with &#8220;bar&#8221;.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span>
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Substitute (find and replace) only the last occurrence of &#8220;foo&#8221; with &#8220;bar&#8221;.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span>
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="s">&#39;bar&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Substitute all occurrences of &#8220;foo&#8221; with &#8220;bar&#8221; on all lines that contain &#8220;baz&#8221;.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span>
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="s">&#39;baz&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="k">else</span> <span class="n">l</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Substitute all occurrences of &#8220;foo&#8221; with &#8220;bar&#8221; on all lines that DO NOT contain &#8220;baz&#8221;.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span>
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="s">&#39;baz&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">l</span> <span class="k">else</span> <span class="n">l</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Change text &#8220;scarlet&#8221;, &#8220;ruby&#8221; or &#8220;puce&#8221; to &#8220;red&#8221;.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span>
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;scarlet&#39;</span><span class="p">,</span> <span class="s">&#39;red&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;ruby&#39;</span><span class="p">,</span> <span class="s">&#39;red&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;puce&#39;</span><span class="p">,</span> <span class="s">&#39;red&#39;</span><span class="p">))</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<ol class="arabic" start="38">
+<li><p class="first">Join pairs of lines side-by-side (emulates &#8220;paste&#8221; Unix command).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">enumerate_</span><span class="p">()</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">consec_group</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="k">lambda</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+<span class="gp">... </span>        <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">select_inds</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">to_list</span><span class="p">()</span> <span class="o">|</span> <span class="n">sink</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span><span class="p">))))</span>  <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">see <a class="reference internal" href="#item-4">Item 4</a> for an explanation of the <a class="reference internal" href="reference.html#dagpype.consec_group" title="dagpype.consec_group"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.consec_group()</span></tt></a> filter use here.</p>
+</div>
+</li>
+</ol>
+<ol class="arabic" id="item-39" start="39">
+<li><p class="first">Append a line to the next if it ends with a backslash &#8220;&#8221;.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">consec_group</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">c</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">l</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;</span><span class="se">\\</span><span class="s">&#39;</span><span class="p">))),</span>
+<span class="gp">... </span>        <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="p">[:</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">l</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;</span><span class="se">\\</span><span class="s">&#39;</span> <span class="k">else</span> <span class="n">l</span><span class="p">)</span> <span class="o">|</span> <span class="n">sum_</span><span class="p">())</span>  <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The first line,</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>initializes <tt class="docutils literal"><span class="pre">c</span></tt> to a list with a single element (0).</p>
+<p>lines 3-5,</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="o">...</span>     <span class="n">consec_group</span><span class="p">(</span>
+<span class="o">...</span>         <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">c</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">l</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;</span><span class="se">\\</span><span class="s">&#39;</span><span class="p">))),</span>
+<span class="o">...</span>         <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="p">[:</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">l</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;</span><span class="se">\\</span><span class="s">&#39;</span> <span class="k">else</span> <span class="n">l</span><span class="p">)</span> <span class="o">|</span> <span class="n">sum_</span><span class="p">())</span>  <span class="o">|</span> \
+</pre></div>
+</div>
+<p class="last">group paragraphs together using the <a class="reference internal" href="reference.html#dagpype.consec_group" title="dagpype.consec_group"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.consec_group()</span></tt></a> filter. The key determining consecutive group is a counter incremented after each line not ending in <tt class="docutils literal"><span class="pre">\</span></tt> (see <a class="reference external" href="http://www.p-nand-q.com/python/stupid_lambda_tricks.html">Stupid lambda tricks</a>); the pipe for a consecutive group strips the <tt class="docutils literal"><span class="pre">\</span></tt> character, and joins the lines.</p>
+</div>
+</li>
+<li><p class="first">Append a line to the previous if it starts with an equal sign &#8220;=&#8221;.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">consec_group</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">c</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;=&#39;</span><span class="p">))),</span>
+<span class="gp">... </span>        <span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="p">[</span><span class="mi">1</span> <span class="p">:]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;=&#39;</span> <span class="k">else</span> <span class="n">l</span><span class="p">)</span> <span class="o">|</span> <span class="n">sum_</span><span class="p">())</span>  <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">see <a class="reference internal" href="#item-39">Item 39</a> for an explanation.</p>
+</div>
+</li>
+</ol>
+<ol class="arabic" start="43">
+<li><p class="first">Add a blank line after every five lines.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">enumerate_</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span> <span class="n">l</span> <span class="k">if</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">5</span> <span class="k">else</span> <span class="p">(</span><span class="n">l</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">))</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The first line,</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">enumerate_</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> \
+</pre></div>
+</div>
+<p class="last">transforms the lines of the files to tuples, whose first item is a running index starting from 1.</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="section" id="selective-printing-of-certain-lines">
+<h2>Selective Printing of Certain Lines<a class="headerlink" href="#selective-printing-of-certain-lines" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic" start="44">
+<li><p class="first">Print the first 10 lines of a file.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">slice_</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">),</span> <span class="mi">10</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Print the first line of a file.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">nth</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Print the last 10 lines of a file.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">tail</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Print the last 2 lines of a file.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">tail</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Print the last line of a file.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">nth</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Print next-to-the-last line of a file.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">nth</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Print only the lines that match a regular expression (emulates &#8220;grep&#8221;).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">grep</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;foo(.+?)bar&#39;</span><span class="p">))</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Print only the lines that do not match a regular expression.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;foo(.+?)bar&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="n">pre</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Print the line immediately before regexp, but not the line containing the regexp.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;foo(.+?)bar&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">to</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">l</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">nth</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Print the line immediately after regexp, but not the line containing the regexp.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;foo(.+?)bar&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">from_</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">l</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">nth</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Print one line before and after regexp. Also print the line matching regexp and its line number. (emulates &#8220;grep -A1 -B1&#8221;).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;foo(.+?)bar&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="p">(</span><span class="n">to</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">l</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">nth</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)))</span> <span class="o">+</span> \
+<span class="gp">... </span>    <span class="p">(</span><span class="n">from_</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">l</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">nth</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span> <span class="o">+</span> \
+<span class="gp">... </span>    <span class="p">(</span><span class="n">enumerate_</span><span class="p">()</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="n">pre</span> <span class="o">=</span> <span class="k">lambda</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span> <span class="n">r</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">l</span><span class="p">))</span> <span class="o">|</span> <span class="n">nth</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Grep for &#8220;AAA&#8221; and &#8220;BBB&#8221; and &#8220;CCC&#8221; in any order.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="n">pre</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="s">&#39;AAA&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="ow">and</span> <span class="s">&#39;BBB&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="ow">and</span> <span class="s">&#39;CCC&#39;</span> <span class="ow">in</span> <span class="n">l</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Grep for &#8220;AAA&#8221; and &#8220;BBB&#8221; and &#8220;CCC&#8221; in that order.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">grep</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;(.*)AAA(.*)BBB(.*)CCC(.*)&#39;</span><span class="p">))</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Grep for &#8220;AAA&#8221; or &#8220;BBB&#8221;, or &#8220;CCC&#8221;.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="n">pre</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="s">&#39;AAA&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="ow">or</span> <span class="s">&#39;BBB&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="ow">or</span> <span class="s">&#39;CCC&#39;</span> <span class="ow">in</span> <span class="n">l</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<ol class="arabic" id="item-58" start="58">
+<li><p class="first">Print a paragraph that contains &#8220;AAA&#8221;. (Paragraphs are separated by blank lines).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">consec_group</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">is_para</span><span class="p">:</span> <span class="n">to_list</span><span class="p">())</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">ls</span><span class="p">:</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ls</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">pre</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ls</span><span class="p">:</span> <span class="nb">sum</span><span class="p">([</span><span class="s">&#39;AAA&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">ls</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>The second line,</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="o">...</span>     <span class="n">consec_group</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">is_para</span><span class="p">:</span> <span class="n">to_list</span><span class="p">())</span> <span class="o">|</span> \
+</pre></div>
+</div>
+<p>groups paragraphs together using the <a class="reference internal" href="reference.html#dagpype.consec_group" title="dagpype.consec_group"><tt class="xref py py-func docutils literal"><span class="pre">dagpype.consec_group()</span></tt></a> filter. The key determining consecutive group is whether a line is empty (hence all lines in a paragraph will get <tt class="docutils literal"><span class="pre">True</span></tt> key, whereas separating lines will get a <tt class="docutils literal"><span class="pre">False</span></tt> key); the pipe for a consecutive group places the lines in a list.</p>
+<p>The third line,</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="o">...</span>     <span class="n">filt</span><span class="p">(</span><span class="k">lambda</span> <span class="n">ls</span><span class="p">:</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ls</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">pre</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ls</span><span class="p">:</span> <span class="nb">sum</span><span class="p">([</span><span class="s">&#39;AAA&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">ls</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> \
+</pre></div>
+</div>
+<p class="last">filters lists: the precondition is that &#8216;AAA&#8217; appears somewhere in the list, and the transformation function joins the lines using a newline.</p>
+</div>
+</li>
+<li><p class="first">Print a paragraph if it contains &#8220;AAA&#8221; and &#8220;BBB&#8221; and &#8220;CCC&#8221; in any order.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">consec_group</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">is_para</span><span class="p">:</span> <span class="n">to_list</span><span class="p">())</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="k">lambda</span> <span class="n">ls</span><span class="p">:</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ls</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">pre</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ls</span><span class="p">:</span> <span class="nb">sum</span><span class="p">([</span><span class="s">&#39;AAA&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="ow">and</span> <span class="s">&#39;BBB&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="ow">and</span> <span class="s">&#39;CCC&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">ls</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">see <a class="reference internal" href="#item-58">Item 58</a> for an explanation.</p>
+</div>
+</li>
+<li><p class="first">Print a paragraph if it contains &#8220;AAA&#8221; or &#8220;BBB&#8221; or &#8220;CCC&#8221;.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">consec_group</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">is_para</span><span class="p">:</span> <span class="n">to_list</span><span class="p">())</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span>
+<span class="gp">... </span>        <span class="k">lambda</span> <span class="n">ls</span><span class="p">:</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ls</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="n">pre</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">ls</span><span class="p">:</span> <span class="nb">sum</span><span class="p">([</span><span class="s">&#39;AAA&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="ow">or</span> <span class="s">&#39;BBB&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="ow">or</span> <span class="s">&#39;CCC&#39;</span> <span class="ow">in</span> <span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">ls</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">see <a class="reference internal" href="#item-58">Item 58</a> for an explanation.</p>
+</div>
+</li>
+<li><p class="first">Print only the lines that are 65 characters in length or more.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="n">pre</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">65</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Print only the lines that are less than 65 chars.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="n">pre</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">65</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<ol class="arabic" start="66">
+<li><p class="first">Beginning at line 3, print every 7th line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">slice_</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_list</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+<div class="section" id="selective-deletion-of-certain-lines">
+<h2>Selective Deletion of Certain Lines<a class="headerlink" href="#selective-deletion-of-certain-lines" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic" start="69">
+<li><p class="first">Delete duplicate, consecutive lines from a file.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">consec_group</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">nth</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Delete duplicate, nonconsecutive lines from a file.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">group</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">nth</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Delete all lines except duplicate consecutive lines (emulates &#8220;uniq -d&#8221;).</p>
+</li>
+<li><p class="first">Delete the first 10 lines of a file.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">slice_</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Delete the last line of a file.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">skip</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Delete the last 2 lines of a file.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">skip</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Delete the last 10 lines of a file.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">skip</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Delete every 8th line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">enumerate_</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">|</span> \
+<span class="gp">... </span>    <span class="n">filt</span><span class="p">(</span><span class="n">pre</span><span class="p">:</span> <span class="k">lambda</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Delete lines that match regular expression pattern.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;foo(.+?)bar&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="n">pre</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">l</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Delete all blank lines in a file (emulates &#8220;grep &#8216;.&#8217;&#8221;).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_lines</span><span class="p">(</span><span class="s">&#39;foo.txt&#39;</span><span class="p">)</span> <span class="o">|</span> <span class="n">filt</span><span class="p">(</span><span class="n">pre</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">|</span> <span class="n">to_stream</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Sed-Like Examples</a><ul>
+<li><a class="reference internal" href="#file-spacing">File spacing</a></li>
+<li><a class="reference internal" href="#numbering">Numbering</a></li>
+<li><a class="reference internal" href="#text-conversion-and-substitution">Text Conversion and Substitution</a></li>
+<li><a class="reference internal" href="#selective-printing-of-certain-lines">Selective Printing of Certain Lines</a></li>
+<li><a class="reference internal" href="#selective-deletion-of-certain-lines">Selective Deletion of Certain Lines</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="beyond_dags.html"
+                        title="previous chapter">Augmenting Pipelines</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="perl.html"
+                        title="next chapter">Perl-Like Examples</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/sed.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="perl.html" title="Perl-Like Examples"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="beyond_dags.html" title="Augmenting Pipelines"
+             >previous</a> |</li>
+        <li><a href="index.html">DAGPype 0.1.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Ami Tavory.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
