@@ -2,6 +2,8 @@
 pypedream
 =======
 
+Forked from [DAGPype-0.1.5.1 by Ami Tavory](https://pypi.python.org/pypi/DAGPype)
+
 This is a Python framework for scientific data-processing and data-preparation DAG (directed acyclic graph) pipelines.
 
 It is designed to work well within Python scripts or IPython_, provide an in-Python alternative for sed_, awk_, perl_, and grep_, and complement libraries such as NumPy_/SciPy_, SciKits_, pandas_, MayaVi_, PyTables_, and so forth. Those libraries process data once it has been assembled. This library is for flexible data assembly and quick exploration, or for aggregating huge data which cannot be reasonably assembled.
@@ -31,7 +33,7 @@ Here is some straightforward code that does this:
 ::
 
     r = csv.DictReader('meteo.csv', ('wind', 'rain'))
-   
+
     sx, sxx, sy, syy, sxy, n = 0, 0, 0, 0, 0, 0
     for row in r:
         x, y = float(row['wind']), float(row['rain'])
@@ -56,7 +58,7 @@ Alternatively, here is some NumPy-based code that does this:
     c = numpy.corrcoef(wind, rain)[0, 1]
 
 This code is shorter and more separated, but the ``numpy.genfromtxt`` call loads the entire dataset into memory, which can be very inefficient.
-    
+
 Conversely, using this library, the code becomes (assuming having typed ``from dagpype import *``):
 ::
 
@@ -91,27 +93,27 @@ Download, Installation, Documentation, And Bugtracking
     .. _PyPI: http://pypi.python.org/pypi/DAGPype
 
 * The usual setup for Python libraries is used. Type:
-    
+
     ``$ pip install dagpype``
-    
+
     or
 
     ``$ sudo pip install dagpype``
 
         .. Note::
-        
-            To install this package from the source distribution, the system must have a C++ compiler installed. The setup script will invoke this compiler. 
-            
+
+            To install this package from the source distribution, the system must have a C++ compiler installed. The setup script will invoke this compiler.
+
             Using Python 2.* on Windows will attempt to invoke Visual Studio 2008. If you are using a Visual Studio 2010 or 2012, download and extract the archive. From within the DAGPype directory, use
-            
+
             ``> SET VS90COMNTOOLS=%VS100COMNTOOLS%``
-            
+
             or
-            
+
             ``> SET VS90COMNTOOLS=%VS110COMNTOOLS%``
-            
+
             (for Visual Studio 2010 and 2012, respectively), followed by
-            
+
             ``> python setup.py install``
 
 * The documentation is hosted at `PyPI Docs`_ and can also be found in the 'docs' directory of the distribution.
@@ -139,7 +141,7 @@ A Few Quick Examples
 
 #. Find the correlation between the data in two different files, 'wind.txt', and 'rain.txt':
     ::
-    
+
         >>> stream_vals('wind.txt') + stream_vals('rain.txt') | corr()
         0.74
 
@@ -183,7 +185,7 @@ A Few Quick Examples
 
 #. Find the correlation between smoothed versions of the 'wind' and 'rain' columns of 'meteo.csv':
     ::
-    
+
         >>> c = stream_vals('meteo.csv', (b'wind', b'rain')) | \
         ...    (select_inds(0) | low_pass_filter(0.5)) + (select_inds(1) | low_pass_filter(0.5)) | \
         ...    corr()
@@ -216,14 +218,14 @@ A Few Quick Examples
         >>> debug = False
         >>> stream_vals('wind.txt') | (trace() if debug else relay()) | sum_()
         432.0
-        
+
 #. Use regular Python functions returning sub-pipes. The following function takes a file name, and returns a pipeline of the exponential average of the absolute values of its values, which is then used for finding a correlation:
     ::
 
         >>> def abs_exp_ave(f_name):
         ...     return stream_vals(f_name) | abs_() | exp_ave(0.5)
-            
-        >>> abs_exp_ave('foo.dat') + abs_exp_ave('bar.dat') | corr()        
+
+        >>> abs_exp_ave('foo.dat') + abs_exp_ave('bar.dat') | corr()
 
 #. Use pipelines within regular Python list comprehension. The following creates a list of means and standard deviations of the contents of the files in some directory
     ::
@@ -242,7 +244,7 @@ A Few Quick Examples
 
         >>> stream_vals('meteo.csv', (b'day', b'wind')) | \
         ...     group(
-        ...         lambda (day, wind) : day, 
+        ...         lambda (day, wind) : day,
         ...         lambda day : select_inds(1) | (np.to_array() | sink(lambda a : median(a))) | \
         ...     cum_ave() | (plot.plot() | plot.show())
 
@@ -256,26 +258,26 @@ Changes
     :widths: 15, 15, 70
     :delim: $
 
-    0.1.5.1 $ 19/04/2013 $ NumPy 1.7.1 Compilation bugfix 
+    0.1.5.1 $ 19/04/2013 $ NumPy 1.7.1 Compilation bugfix
     0.1.5 $ 18/04/2013 $ Doctest in unittests: numerous doc bugfixes, illegal floats parse bugfix
     0.1.4.0 $ 18/02/2013 $ CSV parser IEEE exception bugfix, offline docs bugfix
     0.1.3.9 $ 03/02/2013 $ Python 2.6 backport
     0.1.3.8 $ 28/01/2013 $ OS X build bugfixes
     0.1.3.7 $ 18/01/2013 $ Windows build / IO bugfixes
     0.1.3.6 $ 16/01/2013 $ Py3K
-    0.1.3.5 $ 15/01/2013 $ CSV parser bugfix, Perl, Awk, and Sed type stages, GNU/Linux gather-IO backend   
+    0.1.3.5 $ 15/01/2013 $ CSV parser bugfix, Perl, Awk, and Sed type stages, GNU/Linux gather-IO backend
     0.1.3.4 $ 05/01/2013 $ Moving to PyPI
     0.1.3.3 $ 02/01/2013 $ Consecutive vs. non-consecutive grouping, import bugfix
     0.1.3.2 $ 20/12/2012 $ CSV filter stage
     0.1.3.1 $ 12/12/2012 $ Missing extension bugfix
-    0.1.3 $ 12/12/2012 $ Optimized C numpy IO 
+    0.1.3 $ 12/12/2012 $ Optimized C numpy IO
     0.1.2.3 $ 7/12/2012 $ Bugfix (stream_vals)
     0.1.2.2 $ 3/12/2012 $ Bugfixes (VC++, select_inds)
     0.1.2.1 $ 2/12/2012 $ Better pyplot keyword args support
     0.1.2 $ 29/11/2012 $ Various plotting stages
     0.1.1.3 $ 29/11/2012 $ Rand size samples, text/regex grep
     0.1.1.1 $ 20/10/2012 $ More moving averages, min/max, quantiles, etc.
-    0.1.1 $ 20/10/2012 $ Optimized C CSV reader 
+    0.1.1 $ 20/10/2012 $ Optimized C CSV reader
     0.1.0.3 $ 30/9/2012 $ Py3 compatibility
     0.1.0.2 $ 28/9/2012 $ More numpy stages
     0.1.0.1 $ 22/9/2012 $ Setup bugfix
@@ -292,5 +294,3 @@ This library uses many ideas from David Beazley's generator talk [Beazley08]_ an
 .. [Beazley09] http://www.dabeaz.com/coroutines/
 
 Many thanks to Anand Jeyahar, Brad Reisfeld, Tal Kremerman, Eran Segal, and Simon Pantzare for patches.
- 
-
