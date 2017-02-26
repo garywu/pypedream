@@ -1,5 +1,5 @@
 =======
-DAGPype
+pypedream
 =======
 
 This is a Python framework for scientific data-processing and data-preparation DAG (directed acyclic graph) pipelines.

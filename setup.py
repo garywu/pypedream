@@ -40,7 +40,7 @@ class _DocumentCommand(Command):
             os.system('make html')
                     
             for f_name in glob.iglob('*.html'):
-                os.system("perl -p -i -e 's/pypi\/dagpype/pypi/DAGPype/g' %s" % f_name)
+                os.system("perl -p -i -e 's/pypi\/pypedream/pypi/pypedream/g' %s" % f_name)
 
             if self.aspell:
                 for f_name in glob.iglob('*.html'):
@@ -108,48 +108,48 @@ class _PerformanceTestCommand(Command):
             os.chdir('..')
 
 
-dagpype_c = Extension('dagpype_c',
+pypedream_c = Extension('pypedream_c',
     include_dirs = ['/usr/local/include'] + 
         numpy.distutils.misc_util.get_numpy_include_dirs(),
     language = 'c++',
     depends = [
-        'dagpype/line_writer.hpp',
-        'dagpype/correlator.hpp',
-        'dagpype/enumerator.hpp',
-        'dagpype/dbg.hpp',
-        'dagpype/col_reader.hpp', 
-        'dagpype/array_col_reader.hpp', 
-        'dagpype/_line_to_array.hpp', 
-        'dagpype/defs.hpp',
-        'dagpype/parser_defs.hpp',
-        'dagpype/line_to_tuple.hpp',
-        'dagpype/exp_averager.hpp'],
+        'pypedream/line_writer.hpp',
+        'pypedream/correlator.hpp',
+        'pypedream/enumerator.hpp',
+        'pypedream/dbg.hpp',
+        'pypedream/col_reader.hpp', 
+        'pypedream/array_col_reader.hpp', 
+        'pypedream/_line_to_array.hpp', 
+        'pypedream/defs.hpp',
+        'pypedream/parser_defs.hpp',
+        'pypedream/line_to_tuple.hpp',
+        'pypedream/exp_averager.hpp'],
     sources = [
-        'dagpype/line_writer.cpp',
-        'dagpype/correlator.cpp',
-        'dagpype/enumerator.cpp',
-        'dagpype/col_reader.cpp', 
-        'dagpype/array_col_reader.cpp', 
-        'dagpype/_line_to_array.cpp', 
-        'dagpype/module.cpp', 
-        'dagpype/defs.cpp',
-        'dagpype/parser_defs.cpp',
-        'dagpype/line_to_tuple.cpp',
-        'dagpype/exp_averager.cpp'])
+        'pypedream/line_writer.cpp',
+        'pypedream/correlator.cpp',
+        'pypedream/enumerator.cpp',
+        'pypedream/col_reader.cpp', 
+        'pypedream/array_col_reader.cpp', 
+        'pypedream/_line_to_array.cpp', 
+        'pypedream/module.cpp', 
+        'pypedream/defs.cpp',
+        'pypedream/parser_defs.cpp',
+        'pypedream/line_to_tuple.cpp',
+        'pypedream/exp_averager.cpp'])
 
 
 setup(
-    name = 'DAGPype',
+    name = 'pypedream',
     version = '0.1.5.1',
     author = 'Ami Tavory',
     author_email = 'atavory at gmail.com',
-    packages = ['dagpype', 'dagpype.np', 'dagpype.plot'],
-    url = 'http://pypi.python.org/pypi/DAGPype',
+    packages = ['pypedream', 'pypedream.np', 'pypedream.plot'],
+    url = 'http://pypi.python.org/pype/pypedream',
     license = 'BSD',
     description = 'Low-footprint flexible data-processing and data-preparation pipelines',
     long_description = open('README.txt').read(),
     requires = ['numpy', 'matplotlib', 'unittest_rand_gen_state'],
-    ext_modules = [dagpype_c],
+    ext_modules = [pypedream_c],
     cmdclass = { 
         'test': _TestCommand, 
         'performance_test': _PerformanceTestCommand,
